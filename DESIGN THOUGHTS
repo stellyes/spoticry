@@ -1,0 +1,6 @@
+For running this in the cloud, dont waste your time with EC2 instances. Generating a simple HTTP API via AWS will accomodate for an as-needed, by request payment plan and will reduce costs greatly.
+There are a few things that are troubling about this, though:
+    There are definitely limitations with the spotify web api. If i can insure that im able to use the api to boot up multiple accounts in the same instance than that's ideal
+    Ensuring this will work via lambda on aws. Lambda endpoints have limited capability, and I cant have the code wait around for a confirmation of play. I need to be checking the response code.
+    How do I avoid tracking this all on the same API key? I need to request a key via a proxy at any given moment, spread it around the world. Tricky. 
+    

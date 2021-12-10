@@ -1,0 +1,3 @@
+"Temp Mail" by Privatix via RapidAPI
+    Temporary Email Service Documentation
+    https://rapidapi.com/Privatix/api/temp-mail/
