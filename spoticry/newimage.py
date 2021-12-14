@@ -19,14 +19,14 @@ sysout = sys.stdout
 
 
 def main():
-    REQ_AMT = sys.argv[1]
+    REQ_AMT = 25
     x = 0
 
-    if REQ_AMT > MAXIMUM_IMG_COUNT:
-        print(">>> Maximum requested images exceeded. Defaulting to max value.")
-        REQ_AMT = MAXIMUM_IMG_COUNT
+    #if REQ_AMT > MAXIMUM_IMG_COUNT:
+    #    print(">>> Maximum requested images exceeded. Defaulting to max value.")
+    #    REQ_AMT = MAXIMUM_IMG_COUNT
 
-    with open("src/words.txt", "r") as words:
+    with open("src/txt/words.txt", "r") as words:
         for line in words:
             if x < REQ_AMT:
                 try:
