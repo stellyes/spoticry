@@ -2,9 +2,11 @@ import os
 import sys
 import json
 import time
+import errno
 import random 
 import string
 import hashlib
+import pathlib
 import requests
 from requests import HTTPError
 from selenium import webdriver
@@ -88,7 +90,7 @@ def generate_password(length):
     return password
 
 
-def generate_username(exec_code):
+def generate_username():
 # Random username generator 
 
     markers = [0, 0, 0, 0]          # Markers used to prevent duplicate entries
@@ -129,11 +131,7 @@ def generate_username(exec_code):
                 op3 = select_entry("src/txt/words.txt") 
             username = username + op3
 
-    # exec_code used for formatted returns during testing stages.
-    if exec_code == 1:
-        return username
-    elif exec_code == 0:
-        return username
+    return username
 
 
 def generate_email(domain_index):
@@ -160,39 +158,35 @@ def generate_birthday(dob_month, dob_day, dob_year):
 def update_records(email_hash, data):
 # Updates JSON records with aggregated, generated user infomration
 
-    __nof = 'src/ref/__nof'
-    __dir = os.path.join('/src/json')       # JSON output directory
-    b_dir = os.path.isfile(__dir)           # checks if __dir exists
+    __dir = os.path.join('src/json')    # JSON output directory
+    __nof = 0                           # Number of files in output directory
 
-    if not b_dir:
+    if not os.path.exists(__dir):
         try:
             os.makedirs(__dir)
-        except:     
-            print("\n>>> ERROR\n>>> ID: " + email_hash + '\n>>> Could not create output directory\n')
-            sys.exit()
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    for path in pathlib.Path("src/json").iterdir():
+        if path.is_file():
+            __nof += 1     
 
     obj = json.dumps(data, indent=4)    # Create JSON object from dictionary
 
-    try:
-        with open(__nof, 'r') as n:     # Read from count file
-            num = int(n.readline()) + 1 # Set account number to count++
-            n.truncate()                # Erase file data
-            n.write(num)                # Write new value to file
-        
-        zf = num.zfill(5)                           # Account number
-        export = 'src/json/' + str(zf) + '.json'    # Path to account JSOn
+    num = str(increment_user_count())
+    zf = num.zfill(16)                           # Account number
+    print(zf)
+    sys.exit()
+    export = 'src/json/' + zf + '.json'    # Path to account JSON
 
-        try:
-            with open(export, 'x') as x:
-                json.dump(obj, x)
-        except:
-            print("\n>>> ERROR\n>>> ID: " + email_hash + '\n>>> Could not create JSON file\n')
-    except FileNotFoundError:
-        try:
-            with open(__nof, 'x') as m:
-                m.write(int(0))
-        except:
-            print("\n>>> ERROR\n>>> ID: " + email_hash + '\n>>> Could not create index file\n')
+    try:
+        with open(export, 'x') as x:
+            json.dump(obj, x)
+    except:
+        print("\n>>> ERROR\n>>> ID: " + email_hash + '\n>>> Could not create JSON file\n')
+
+        
         
     return obj
 
@@ -209,7 +203,7 @@ def main():
 
         # Generate spotifyUser data
         email, email_hash = generate_email(domain_index)            # Generate temp email address and email MD5 hash token
-        username = generate_username(0)                             # Generate random username
+        username = generate_username()                              # Generate random username
         password = generate_password(password_length)               # Generate random password
         birthday = generate_birthday(dob_month, dob_day, dob_year)  # Generate random birthday
         gender = random.randint(0, 2)                               # Generate random gender selection
@@ -232,7 +226,7 @@ def main():
 
         obj = update_records(email_hash, newUser)
         
-        print("\n>> User " + newUser.username + " successfully generated")
+        print("\n>> User " + newUser["user"] + " successfully generated")
         print("\n" + obj)
 
     
