@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import time
 import errno
@@ -137,7 +136,7 @@ def generate_username():
 def generate_email(domain_index):
 # Generates email address and corresponding MD5 hash of email    
     # Generate random string for email
-    base_string = generate_username(1)
+    base_string = generate_username()
     domain = domains[domain_index]
 
     email = base_string + domain
@@ -161,6 +160,7 @@ def update_records(email_hash, data):
     __dir = os.path.join('src/json')    # JSON output directory
     __nof = 0                           # Number of files in output directory
 
+    # Creates directory if __dir does note exist
     if not os.path.exists(__dir):
         try:
             os.makedirs(__dir)
@@ -168,27 +168,21 @@ def update_records(email_hash, data):
             if e.errno != errno.EEXIST:
                 raise
 
+    # Count number of JSON files in directory
     for path in pathlib.Path("src/json").iterdir():
         if path.is_file():
             __nof += 1     
 
-    obj = json.dumps(data, indent=4)    # Create JSON object from dictionary
 
-    num = str(increment_user_count())
-    zf = num.zfill(16)                           # Account number
-    print(zf)
-    sys.exit()
-    export = 'src/json/' + zf + '.json'    # Path to account JSON
+    num = str(__nof)                       # Convert file counter to str for file name
+    zf = num.zfill(16)                     # Account number prepended with fixed number of zeros
+    export = 'src/json/' + zf + '.json'    # Path to account JSON file
 
     try:
         with open(export, 'x') as x:
-            json.dump(obj, x)
+            json.dump(data, x, indent=4)
     except:
         print("\n>>> ERROR\n>>> ID: " + email_hash + '\n>>> Could not create JSON file\n')
-
-        
-        
-    return obj
 
 
 def main():
@@ -224,11 +218,10 @@ def main():
             "md5_hash": email_hash
         }
 
-        obj = update_records(email_hash, newUser)
+        # Print generated user to JSON file
+        update_records(email_hash, newUser)
         
         print("\n>> User " + newUser["user"] + " successfully generated")
-        print("\n" + obj)
-
     
 if __name__ == "__main__":
     main()    

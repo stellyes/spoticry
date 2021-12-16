@@ -1,3 +1,10 @@
 "Temp Mail" by Privatix via RapidAPI
     Temporary Email Service Documentation
     https://rapidapi.com/Privatix/api/temp-mail/
+
+Proxies for cheap, high concurrency can run tons of accounts
+from limited number of proxies (500 proxies, 5000+ instances of concurrency)
+    $39.06 Monthly Cost
+    500 Proxy servers
+    5000 GBs of bandwidth
+    https://proxy.webshare.io/subscription/customize/?source=top-icon
