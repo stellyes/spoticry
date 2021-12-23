@@ -11,7 +11,7 @@ import urllib.request
 import urllib.error
 
 PROXYLIST = "src/webdriver/proxy.json"
-PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=speed&sort_type=asc&protocols=https%2Csocks4%2Csocks5&anonymityLevel=elite&anonymityLevel=anonymous"
+PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
 BANNED_LOCATIONS = ["--", "HK", "CN"]
 
 

@@ -1,7 +1,9 @@
 import sys
 import time
+import proxy 
 import random
 import requests
+from hashlib import md5
 from requests import HTTPError
 from selenium import webdriver
 import proxy as prox
@@ -11,7 +13,6 @@ API_URL = 'https://2captcha.com/in.php?'
 REQ_URL = 'https://www.spotify.com/us/signup'
 
 
-
 def sign_up(user):
     # Handles sign-up process using generated user info
 
@@ -19,13 +20,14 @@ def sign_up(user):
     proxy = user['proxy']['ip']
     chrome_options = webdriver.ChromeOptions()               # Options argument initalization
     chrome_options.add_argument('--proxy-server=%s' % proxy) # Assigns proxy
-    chrome_options.add_argument('--headless')                # Specifies GUI display, set to headless (NOGUI)
+    # Uncomment when debugging is complete
+    # chrome_options.add_argument('--headless')                # Specifies GUI display, set to headless (NOGUI)
 
     # Use Google Chrome webdriver to handle form filling      
     web = webdriver.Chrome(options=chrome_options) 
 
     # Open Spotify sign-up URL via webdriver
-    web.get(sign_up_url)
+    web.get(REQ_URL)
     time.sleep(15)
 
     # Locate and fill email portion of form
