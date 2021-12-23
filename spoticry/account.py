@@ -8,6 +8,7 @@ import string
 import hashlib
 import pathlib
 import proxy as prox
+import verify as verify
 
 months = ['January', 'February', 'March', 'April', 'May', 'June',
           'July', 'August', 'September', 'October', 'November', 'December']
@@ -140,9 +141,11 @@ def update_records(email_hash, data):
 
 
 def main():
-    amount = 1
+    amount = 100
 
     for i in range(amount):
+        print("\n>> Generating new user...")
+
         # Random elements initialized
         password_length = random.randint(8, 16)
         domain_index = random.randint(0, 9)
@@ -163,10 +166,17 @@ def main():
         gender = random.randint(0, 2)
         # Generate random response to marketing infomation
         marketing_info = random.randint(0, 1)
+
         # Generate random proxy from list of scraped proxies
-        print("\n>> Fetching proxy information...")
+        print(">> Fetching proxy information...")
         proxy_info = prox.get()
         print(">> Proxy " + proxy_info['ip'] + " selected")
+
+        # If proxy fails connection, get new proxy value to assign
+        print(">>\t Testing connection: " + proxy_info['ip'] + "...")
+        while (prox.check(proxy_info['ip']) < 2):
+            print(">>\t Testing connection: " + proxy_info['ip'] + "...")
+            proxy_info = prox.get()
         
 
         # Create spotifyUser dictionary
@@ -191,12 +201,16 @@ def main():
 
         print(">> Credentials for " + newUser["user"] + " generated.")
         time.sleep(random.randint(1, 3))
+
+        # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
+        status, date = verify.sign_up(newUser)
+
 
         # Print generated user to JSON file
         update_records(email_hash, newUser)
 
-        print(">> User " + newUser["user"] + " successfully generated")
+        print(">> User " + newUser["user"] + " successfully generated\n")
 
 
 if __name__ == "__main__":

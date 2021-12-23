@@ -22,7 +22,7 @@ def test_connection(proxy):
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         urllib.request.install_opener(opener)
         req = urllib.request.Request('https://deoautemnihil.bandcamp.com/')
-        sock = urllib.request.urlopen(req)
+        urllib.request.urlopen(req)
     except urllib.error.HTTPError as e:
         print('>> ERROR: ', e.code)
         return e.code
@@ -33,13 +33,24 @@ def test_connection(proxy):
 
 
 def check(proxy):
+
+    # Status Codes:
+    #   0 = Uninitialized
+    #   1 = Failed
+    #   2 = Success
+    #   3 = Debug
+
+    statuscode = 0
     socket.setdefaulttimeout(120)
 
     if test_connection(proxy):
+        statuscode = 1
         print('>>\tERROR:\n>>\tPROXY: ' + proxy + '\n>>\tExpired proxy. Updating list.')
-        update()
     else:
-        print('>> Proxy connection successful')    
+        print('>>\t Proxy connection successful') 
+        statuscode = 2
+
+    return statuscode   
 
 def update():
     # Grabs proxy list from latest update on genode.com
@@ -143,7 +154,7 @@ def get():
 
     # Execute update of file if proxies outdated
     if (current_time - last_modified) > 600:
-        print(">> Proxy list outdated. Grabbing latest proxy list")
+        print(">>\t Proxy list outdated. Grabbing latest proxy list")
         
         # Remove all files and directories associated with old list
         try:
@@ -151,7 +162,7 @@ def get():
             shutil.rmtree('src/webdriver/proxies')
             os.remove('src/webdriver/proxy.json')
         except OSError as e:
-            print(">> ERROR: " + e.strerror)
+            print(">>\t ERROR: " + e.strerror)
 
         update()
 
