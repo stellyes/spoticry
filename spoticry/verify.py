@@ -1,8 +1,12 @@
+import sys
 import time
+import proxy 
 import random
 import requests
+from hashlib import md5
 from requests import HTTPError
 from selenium import webdriver
+
 
 apikeycapatcha = 'cfdd1e0dafb83224e79a5ade1e9191a9'
 sign_up_url = 'https://www.spotify.com/us/signup'
@@ -25,7 +29,9 @@ def sign_up(user):
     PROXY = select_proxy()
     chrome_options = webdriver.ChromeOptions()               # Options argument initalization
     chrome_options.add_argument('--proxy-server=%s' % PROXY) # Assigns proxy
-    chrome_options.add_argument('--headless')                # Specifies GUI display, set to headless (NOGUI)
+
+    # Uncomment when debugging is complete
+    # chrome_options.add_argument('--headless')                # Specifies GUI display, set to headless (NOGUI)
 
     # Use Google Chrome webdriver to handle form filling      
     web = webdriver.Chrome(options=chrome_options) 
@@ -68,3 +74,30 @@ def sign_up(user):
     dob_year_input = web.find_element_by_xpath('//*[@id="year"]')
     dob_year_input.send_keys()
     time.sleep(random.randint(1, 9))
+
+def main():
+    user = {
+            "email": 'test@test.com',
+            "user": 'test',
+            "pass": 'account',
+            "dob": {
+                "day": 1,
+                "month": 'January',
+                "year": 1999
+            },
+            "gender": 1,
+            "opt_in": 1,
+            "md5_hash": md5('test@test.com'),
+            "proxy": proxy.get(),
+            "verified": {
+                "status": '',
+                "date": ''
+            }
+        }
+
+    sign_up(user)
+
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
