@@ -3,11 +3,11 @@ import sys
 import time
 import json
 import errno
+import proxy
 import random
 import string
 import hashlib
 import pathlib
-import proxy as prox
 import verify as verify
 
 months = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -169,14 +169,14 @@ def main():
 
         # Generate random proxy from list of scraped proxies
         print(">> Fetching proxy information...")
-        proxy_info = prox.get()
+        proxy_info = proxy.get()
         print(">> Proxy " + proxy_info['ip'] + " selected")
 
         # If proxy fails connection, get new proxy value to assign
         print(">>\t Testing connection: " + proxy_info['ip'] + "...")
-        while (prox.check(proxy_info['ip']) < 2):
+        while (proxy.check(proxy_info['ip']) < 2):
             print(">>\t Testing connection: " + proxy_info['ip'] + "...")
-            proxy_info = prox.get()
+            proxy_info = proxy.get()
         
 
         # Create spotifyUser dictionary
@@ -205,7 +205,6 @@ def main():
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
         status, date = verify.sign_up(newUser)
-
 
         # Print generated user to JSON file
         update_records(email_hash, newUser)
