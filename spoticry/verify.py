@@ -18,7 +18,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
 API_URL = 'https://2captcha.com/in.php?'
-REQ_URL = 'https://www.spotify.com/us/signup'
+REQ_URL_US = 'https://www.spotify.com/us/signup'
+REQ_URL_UK = 'https://www.spotify.com/uk/signup'
+REQ_URL_TR = 'https://www.spotify.com/tr/signup'
 
 WEBDRIVER = 'src/webdriver/chromedriver.exe'
 
@@ -39,7 +41,7 @@ def sign_up(user):
     web = webdriver.Chrome(executable_path=WEBDRIVER, options=chrome_options) 
 
     # Open Spotify sign-up URL via webdriver
-    web.get(REQ_URL)
+    web.get(REQ_URL_US)
     print(">>\t Loading webpage")
     time.sleep(3)
 

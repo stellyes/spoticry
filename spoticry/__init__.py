@@ -1,6 +1,6 @@
-__all__ = ["Account", "Image", "Playlist", "Proxy", "Verify"]
+__all__ = ["Account", "Playlist", "Proxy", "Verify", "spoticore"]
 from spoticry.account import Account
-from spoticry.image import Image 
 from spoticry.playlist import Playlist
 from spoticry.proxy import Proxy 
 from spoticry.verify import Verify
+from spoticry.spoticore import spoticore

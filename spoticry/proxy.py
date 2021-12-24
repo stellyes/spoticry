@@ -10,6 +10,8 @@ import requests
 import urllib.request
 import urllib.error
 
+import spoticore
+
 PROXYLIST = "src/webdriver/proxy.json"
 PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
 BANNED_LOCATIONS = ["--", "HK", "CN"]
@@ -66,31 +68,9 @@ def update():
         r = requests.get(PROXYFARM)                 # Pull data from webpage
         html = r.text                               # Convert data to string
         data = json.loads(html)                     # Load string as JSON
-        proxies.write(json.dumps(data, indent=4))   # Write to file 
+        proxies.write(json.dumps(data, indent=4))   # Write to file       
+    
 
-    # Creates directory if proxy folder does note exist
-    if not os.path.exists('src/webdriver/proxies'):
-        try:
-            os.makedirs('src/webdriver/proxies')
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
-    # Creates directory if banned proxy folder does note exist
-    # Folder exists for debugging purposes
-    if not os.path.exists('src/webdriver/banned_proxies'):
-        try:
-            os.makedirs('src/webdriver/banned_proxies')
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise        
-
-    __nof = 0   # Number of files in output directory
-
-    # Count number of JSON files in directory
-    for path in pathlib.Path("src/webdriver/proxies").iterdir():
-        if path.is_file():
-            __nof += 1  
 
     # Parse and print proxy dictionary object to file
     with open(PROXYLIST, "r") as proxies:
@@ -98,10 +78,11 @@ def update():
         data = data_json["data"]                    # Indicate parent to iterate
         for data in data:                                          
             if not data['country'] in BANNED_LOCATIONS:             # Check to see if proxy is from banned country  
-                num = str(__nof)                                    # Convert file counter to str for file name
-                zf = num.zfill(8)                                   # proxy number prepended with fixed number of zeros
-                export = 'src/webdriver/proxies/' + zf + '.json'    # Path to account JSON file    
-                
+                path = 'src/webdriver/sign_up/' + data['country'] + "/proxies/"
+                __nof = spoticore.count(path)
+                num = str(__nof)                                                        # Convert file counter to str for file name
+                zf = num.zfill(4)                                                       # proxy number prepended with fixed number of zeros
+                export = path + zf + '.json' # Path to proxy JSON file                    
                 ip = str(data['ip'] + ":" + data['port'])                       # Render IP
                 country = str(data['country'])                                  # Render country code
                 protocol = str(data['protocols'])[1:-1].lstrip("'").rstrip("'") # Render protocol
@@ -113,12 +94,14 @@ def update():
                     "protocol": protocol
                 }                    
                 
-                with open(export, 'x') as x:
+                with open(export, 'a+') as x:
                         json.dump(proxy, x, indent=4)
             else:
-                num = str(__nof)                                            # Convert file counter to str for file name
-                zf = num.zfill(4)                                           # proxy number prepended with fixed number of zeros
-                export = 'src/webdriver/banned_proxies/' + zf + '.json'     # Path to account JSON file    
+                path = 'src/webdriver/sign_up/' + data['country'] + "/banned_proxies"
+                __nof = spoticore.count(path)
+                num = str(__nof)                                                                    # Convert file counter to str for file name
+                zf = num.zfill(4)                                                                   # proxy number prepended with fixed number of zeros
+                export = path + zf + '.json'      # Path to proxy JSON file    
                 
                 ip = str(data['ip'] + ":" + data['port'])                       # Render IP
                 country = str(data['country'])                                  # Render country code
@@ -131,13 +114,13 @@ def update():
                     "protocol": protocol
                 }                    
                 
-                with open(export, 'x') as x:
-                        json.dump(proxy, x, indent=4)
+                with open(export, 'a+') as x:
+                    json.dump(proxy, x, indent=4)
 
             __nof += 1                  
 
 
-def get():
+def main():
     # Checks if proxylist is up to date, pulls new proxies if file outdated
 
     # If proxy file does not exist, creates proxy.txt
@@ -155,21 +138,10 @@ def get():
     # Execute update of file if proxies outdated
     if (current_time - last_modified) > 600:
         print(">>\t Proxy list outdated. Grabbing latest proxy list")
-        
-        # Remove all files and directories associated with old list
-        try:
-            shutil.rmtree('src/webdriver/banned_proxies')
-            shutil.rmtree('src/webdriver/proxies')
-            os.remove('src/webdriver/proxy.json')
-        except OSError as e:
-            print(">>\t ERROR: " + e.strerror)
-
+        spoticore.clear_proxies()
         update()
 
-    # Pick random file in directorty
-    proxyfile = 'src/webdriver/proxies/' + random.choice(os.listdir('src/webdriver/proxies'))
+     
 
-    with open(proxyfile, "r") as doc:
-        obj = json.loads(doc.read())
-
-    return obj 
+if __name__ == "__main__":
+    main()
