@@ -2,9 +2,8 @@ import os
 import sys
 import time
 import json
-import proxy 
 import random
-import requests
+import spoticore
 from hashlib import md5
 from requests import HTTPError
 from selenium import webdriver
@@ -146,7 +145,7 @@ def main():
             "gender": 1,
             "opt_in": 1,
             "md5_hash": '16d86f132910b8368636bf625f232f37',
-            "proxy": proxy.get(),
+            "proxy": spoticore.get_proxy(),
             "verified": ''
      }
 
