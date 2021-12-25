@@ -1,15 +1,16 @@
+
 import os
 import sys
 import time
 import json
 import random
 import spoticore
+import requests
 from requests import HTTPError
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-import pandas
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import twocaptcha
 
@@ -20,7 +21,7 @@ import twocaptcha
     # for explanation of this. Frankly, idfk what this does but the 
     # code doesn't work without it. 
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
@@ -49,7 +50,7 @@ def sign_up(user):
 
     # Use Google Chrome webdriver to handle form filling      
     web = webdriver.Chrome(
-        service=Service('src/webdriver/chromedriver.exe'), 
+        executable_path=('src/webdriver/chromedriver.exe'), 
         options=chrome_options
         ) 
 
@@ -59,14 +60,14 @@ def sign_up(user):
     time.sleep(2)
 
     # Grab relevant recaptchaCheckboxKey from spotify signup page
-    proplist = []
-    props = web.find_elements(By.XPATH, '//*[@id="__NEXT_DATA__"]')
-    for prop in props:
-        proplist.append(prop.text)
-        
-    print(proplist)    
-    web.close()
+    item = WebDriverWait(web, 10).until(EC.presence_of_element_located(By.XPATH, '//*[@id="__NEXT_DATA__"]'))
+    item_data = item.split("=")[1].split(";")[0]
+    item_json = json.loads(item_data.strip())
+    g_captcha = item_json['props']['pageProps']['data']['recaptchaCheckboxKey']
+    print(g_captcha.split(':')[1].strip())
     sys.exit()
+    web.close()
+    time.sleep(30)
 
     # Locate and fill email portion of form
     email_input = web.find_element('//*[@id="email"]')
