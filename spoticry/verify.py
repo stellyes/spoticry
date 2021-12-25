@@ -4,13 +4,21 @@ import time
 import json
 import random
 import spoticore
-from hashlib import md5
 from requests import HTTPError
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+import pandas
 
 import twocaptcha
+
+
+# Solve and Verify captcha using 2Captcha API
+    #
+    # Refer to https://github.com/2captcha/2captcha-python documentation
+    # for explanation of this. Frankly, idfk what this does but the 
+    # code doesn't work without it. 
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -31,31 +39,32 @@ def sign_up(user):
     #proxy = user['proxy']['ip']
 
     chrome_options = webdriver.ChromeOptions()                  # Options argument initalization
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_argument('--ignore-ssl-errors')
     #chrome_options.add_argument('--proxy-server=%s' % proxy)   # Assigns proxy
+    chrome_options.add_argument('--headless')  
+    chrome_options.add_argument('log-level=3')                 # Specifies GUI display, set to headless (NOGUI)
 
     # Uncomment when debugging is complete
-    #chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
 
     # Use Google Chrome webdriver to handle form filling      
-    web = webdriver.Chrome(executable_path=WEBDRIVER, options=chrome_options) 
+    web = webdriver.Chrome(
+        service=Service('src/webdriver/chromedriver.exe'), 
+        options=chrome_options
+        ) 
 
     # Open Spotify sign-up URL via webdriver
     web.get(REQ_URL_US)
     print(">>\t Loading webpage")
-    time.sleep(3)
-
-    # Solve and Verify captcha using 2Captcha API
-    #
-    # Refer to https://github.com/2captcha/2captcha-python documentation
-    # for explanation of this. Frankly, idfk what this does but the 
-    # code doesn't work without it. 
+    time.sleep(2)
 
     # Grab relevant recaptchaCheckboxKey from spotify signup page
-    props = web.find_elements(By.ID, '__NEXT_DATA__')
-    
-    for x in range(len(props)):
-        print(props[x])
-
+    proplist = []
+    props = web.find_elements(By.XPATH, '//*[@id="__NEXT_DATA__"]')
+    for prop in props:
+        proplist.append(prop.text)
+        
+    print(proplist)    
     web.close()
     sys.exit()
 

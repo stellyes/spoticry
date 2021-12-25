@@ -30,6 +30,24 @@ class dob:
         self.year = year
 
 
+def count(path):
+    '''
+    Counts files in subdirectory
+    '''
+
+    nof = 0   # Number of files in output directory
+
+    # Count number of JSON files in directory
+    if os.path.isdir(path):
+        for path in pathlib.Path(path).iterdir():
+            if path.is_file():
+                nof += 1 
+    else:
+        makedir(path)            
+
+    return nof   
+
+
 def random_parameter(r1, r2):
     '''
     Returns random integer in specified range (inclusive)
@@ -156,7 +174,7 @@ def update_records(email_hash, data):
     # Convert file counter to str for file name
     num = str(__nof)
     # Account number prepended with fixed number of zeros
-    zf = num.zfill(16)
+    zf = num.zfill(6)
     export = 'src/json/' + zf + '.json'    # Path to account JSON file
 
     try:
@@ -209,12 +227,7 @@ def update_proxy_list():
                 }                   
                 
                 with open(export, 'a+') as x:
-                        json.dump(proxy, x, indent=4)
-            else:
-                ip = str(data['ip'] + ":" + data['port'])                       # Render IP
-                country = str(data['country'])                                  # Render country code
-
-                print(">>\t Proxy " + ip + " is blacklisted\n>>\t Country " + country + " is not supported")                
+                        json.dump(proxy, x, indent=4)               
 
             nof += 1                  
 
@@ -264,7 +277,6 @@ def test_connection(proxy):
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         urllib.request.install_opener(opener)
         req = urllib.request.Request('https://deoautemnihil.bandcamp.com/')
-        urllib2.urlopen(req)
         ping = True
     except urllib.error.HTTPError as e:
         print('>> ERROR: ', e.code)
@@ -274,8 +286,7 @@ def test_connection(proxy):
     
     if not ping:
         statuscode = 1
-        print('>>\tERROR: ' + proxy + '\n>>\tExpired proxy. Updating list.')
-        update_proxy_list()
+        print('>>\tERROR: ' + proxy + ' has expired')
     else:
         print('>>\t Proxy connection successful') 
         statuscode = 2
@@ -359,25 +370,7 @@ def get_proxy():
     with open(proxyfile, "r") as doc:
         obj = json.loads(doc.read())
 
-    return obj
-    
-
-def count(path):
-    '''
-    Counts files in subdirectory
-    '''
-
-    nof = 0   # Number of files in output directory
-
-    # Count number of JSON files in directory
-    if os.path.isdir(path):
-        for path in pathlib.Path(path).iterdir():
-            if path.is_file():
-                nof += 1 
-    else:
-        makedir(path)            
-
-    return nof        
+    return obj     
 
 
 def fetch_image(amount):

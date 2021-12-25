@@ -61,7 +61,7 @@ def main():
             }
         }
 
-        print(">> Credentials for " + newUser["user"] + " generated.")
+        print(">> Credentials for " + newUser["user"] + " generated")
 
         # Send credentials to sign-up page using webdriver
         # print(">> Verifying user...")
