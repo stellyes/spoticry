@@ -4,14 +4,13 @@ import sys
 import time
 import json
 import random
-import spoticore
 import requests
+import spoticore
 from requests import HTTPError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
+from bs4 import BeautifulSoup
 import twocaptcha
 
 
@@ -55,16 +54,15 @@ def sign_up(user):
         ) 
 
     # Open Spotify sign-up URL via webdriver
+    print(">> Loading webpage")
     web.get(REQ_URL_US)
-    print(">>\t Loading webpage")
     time.sleep(2)
 
     # Grab relevant recaptchaCheckboxKey from spotify signup page
-    item = WebDriverWait(web, 10).until(EC.presence_of_element_located(By.XPATH, '//*[@id="__NEXT_DATA__"]'))
-    item_data = item.split("=")[1].split(";")[0]
-    item_json = json.loads(item_data.strip())
-    g_captcha = item_json['props']['pageProps']['data']['recaptchaCheckboxKey']
-    print(g_captcha.split(':')[1].strip())
+    html = requests.get(REQ_URL_US)
+    parsed = BeautifulSoup(html.text, 'html.parser')
+    json_obj = parsed.find('script', id='__NEXT_DATA__', type='application/json')
+    print(json_obj)
     sys.exit()
     web.close()
     time.sleep(30)
