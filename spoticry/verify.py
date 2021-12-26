@@ -5,14 +5,13 @@ import json
 import random
 import requests
 import spoticore
-import twocaptcha
+
 
 from bs4 import BeautifulSoup
 from requests import HTTPError
 from selenium import webdriver
+from twocaptcha import TwoCaptcha
 from selenium.webdriver.common.by import By
-
-
 
 # Solve and Verify captcha using 2Captcha API
     #
@@ -20,16 +19,23 @@ from selenium.webdriver.common.by import By
     # for explanation of this. Frankly, idfk what this does but the 
     # code doesn't work without it. 
 
-#sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 
 
 API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
-API_URL = 'https://2captcha.com/in.php?'
+API_REQ_URL = 'https://2captcha.com/in.php?'
+API_RES_URL = 'https://2captcha.com/res.php?'
 REQ_URL_US = 'https://www.spotify.com/us/signup'
 REQ_URL_UK = 'https://www.spotify.com/uk/signup'
 REQ_URL_TR = 'https://www.spotify.com/tr/signup'
 
 WEBDRIVER = 'src/webdriver/chromedriver.exe'
+
+ZERO_BALANCE = 'ERROR_ZERO_BALANCE'
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+api_env = os.getenv('APIKEY_2CAPTCHA', API_KEY)
+solver = TwoCaptcha(API_KEY)
 
 
 def sign_up(user):
@@ -57,6 +63,7 @@ def sign_up(user):
 
     # Grab relevant recaptchaCheckboxKey from spotify signup page
     print(">> Gathering reCaptcha information...")
+
     html = requests.get(REQ_URL_US)                                                 # Gets HTML source
     parsed = BeautifulSoup(html.text, 'html.parser')                                # Parses HTML response as raw HTML
     json_res = parsed.find('script', id='__NEXT_DATA__', type='application/json')   # Finds <script> tag with captcha info
@@ -65,14 +72,36 @@ def sign_up(user):
     json_str = json_str.removesuffix('</script>')   # Removes ending tag from string
     json_str = json_str[92:]                        # Removes header tags with excess data
 
-    json_obj = json.loads(json_str)
+    json_obj = json.loads(json_str)                 # Converts string to JSON object
 
-    print("recaptchaCheckboxKey: " + json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'])
+    # Gets checkbox key to send to TwoCaptcha API
+    recaptcha_checkbox_key = json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'] 
+    request_twocaptcha = API_REQ_URL + 'key=' + API_KEY + '&methoduserrecaptcha&googlekey=' + recaptcha_checkbox_key + '&pageurl=' + REQ_URL_US
+
+    print(">> reCaptcha information gathered:\n>>\t recaptchaCheckboxKey: " + recaptcha_checkbox_key)
+
+    try:
+        r = requests.get(request_twocaptcha)
+        time.sleep(45)
+
+        try:
+            r.raise_for_status()
+        except HTTPError as http_err:
+            print(f'HTTP request failed: {http_err}')
+
+        output = str(r.text)
+
+        if output in ZERO_BALANCE:
+            print(">> 2Captcha Error: ERROR_ZERO_BALANCE returned\n>> Add funds to your 2Captcha account to proceed")
+            sys.exit()
+
+        print(r.text)    
+    except Exception as e:
+        print(e)
+
+           
     sys.exit()
-
-
-    web.close()
-    time.sleep(30)
+    
 
     # Locate and fill email portion of form
     email_input = web.find_element('//*[@id="email"]')
