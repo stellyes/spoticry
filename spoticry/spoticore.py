@@ -313,13 +313,12 @@ def clear_proxies():
     '''
 
     # Get subdirectory names associated with each country
-    path = 'src/webdriver/sign_up'
-    directories = os.listdir(path)
+    makedir('src/webdriver/sign_up')
+    directories = os.listdir('src/webdriver/sign_up')
     
     # Iterate through directories and delete respective proxy data
     for directory in directories:
-        proxies = path + '/' + directory + '/proxies'
-        banned_proxies = path + '/' + directory + '/banned_proxies'
+        proxies = 'src/webdriver/sign_up/' + directory + '/proxies'
 
         if os.path.isdir(proxies):
             for item in os.scandir(proxies):
@@ -327,15 +326,7 @@ def clear_proxies():
                     shutil.rmtree(item)
                 except OSError:
                     os.remove(item)
-            shutil.rmtree(proxies)
-
-        if os.path.isdir(banned_proxies):
-            for item in os.scandir(banned_proxies):
-                try:
-                    shutil.rmtree(item)
-                except OSError:
-                    os.remove(item) 
-            shutil.rmtree(banned_proxies)        
+            shutil.rmtree(proxies)       
 
     try:
         shutil.rmtree('src/webdriver/proxy.json') 

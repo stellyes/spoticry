@@ -1,4 +1,3 @@
-
 import os
 import sys
 import time
@@ -6,12 +5,13 @@ import json
 import random
 import requests
 import spoticore
+import twocaptcha
+
+from bs4 import BeautifulSoup
 from requests import HTTPError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from bs4 import BeautifulSoup
-import twocaptcha
 
 
 # Solve and Verify captcha using 2Captcha API
@@ -39,14 +39,12 @@ def sign_up(user):
     #proxy = user['proxy']['ip']
 
     chrome_options = webdriver.ChromeOptions()                  # Options argument initalization
-    chrome_options.add_argument('--ignore-certificate-errors')
-    chrome_options.add_argument('--ignore-ssl-errors')
-    #chrome_options.add_argument('--proxy-server=%s' % proxy)   # Assigns proxy
-    chrome_options.add_argument('--headless')  
-    chrome_options.add_argument('log-level=3')                 # Specifies GUI display, set to headless (NOGUI)
-
-    # Uncomment when debugging is complete
-
+    # chrome_options.add_argument('--proxy-server=%s' % proxy)  # Assigns proxy
+    chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
+    chrome_options.add_argument('--ignore-certificate-errors')  # Minimize console output
+    chrome_options.add_argument('--ignore-ssl-errors')          # Minimize console output
+    chrome_options.add_argument('log-level=3')                  # Minimize console output
+    
     # Use Google Chrome webdriver to handle form filling      
     web = webdriver.Chrome(
         executable_path=('src/webdriver/chromedriver.exe'), 
@@ -54,16 +52,25 @@ def sign_up(user):
         ) 
 
     # Open Spotify sign-up URL via webdriver
-    print(">> Loading webpage")
+    print(">> Loading webpage...")
     web.get(REQ_URL_US)
-    time.sleep(2)
 
     # Grab relevant recaptchaCheckboxKey from spotify signup page
-    html = requests.get(REQ_URL_US)
-    parsed = BeautifulSoup(html.text, 'html.parser')
-    json_obj = parsed.find('script', id='__NEXT_DATA__', type='application/json')
-    print(json_obj)
+    print(">> Gathering reCaptcha information...")
+    html = requests.get(REQ_URL_US)                                                 # Gets HTML source
+    parsed = BeautifulSoup(html.text, 'html.parser')                                # Parses HTML response as raw HTML
+    json_res = parsed.find('script', id='__NEXT_DATA__', type='application/json')   # Finds <script> tag with captcha info
+
+    json_str = str(json_res)                        # Converts HTML response to string
+    json_str = json_str.removesuffix('</script>')   # Removes ending tag from string
+    json_str = json_str[92:]                        # Removes header tags with excess data
+
+    json_obj = json.loads(json_str)
+
+    print("recaptchaCheckboxKey: " + json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'])
     sys.exit()
+
+
     web.close()
     time.sleep(30)
 

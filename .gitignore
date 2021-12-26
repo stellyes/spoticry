@@ -1,6 +1,6 @@
 spoticry/src/json
 spoticry/src/img
-spoticry/src/webdriver/banned_proxies
-spoticry/src/webdriver/proxies
 spoticry/src/webdriver/proxy.json
+spoticry/src/webdriver/sign_up
 spoticry/src/__pycache__
+
