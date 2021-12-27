@@ -7,8 +7,4 @@ from limited number of proxies (500 proxies, 5000+ instances of concurrency)
     $39.06 Monthly Cost
     500 Proxy servers
     5000 GBs of bandwidth
-    https://proxy.webshare.io/subscription/customize/?source=top-icon
-
-Parsing HTML in Python
-    For the purposes of this project, refer to:
-    https://docs.python.org/3/library/html.parser.html#html.parser.HTMLParser.handle_data     
+    https://proxy.webshare.io/subscription/customize/?source=top-icon   
