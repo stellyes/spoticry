@@ -14,13 +14,31 @@ import requests
 import datetime
 import threading
 
-from requests import HTTPError  
+from bs4 import BeautifulSoup
+from requests import HTTPError
+from twocaptcha import TwoCaptcha  
 
 PROXYLIST = "src/webdriver/proxy.json"
 PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
 BANNED_LOCATIONS = ["--", "HK", "CN"] 
 MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 DOMAINS = ['@mailkept.com', '@promail1.net', '@rcmails.com', '@relxv.com', '@folllo.com', '@fortuna7.com', '@invecra.com', '@linodg.com', '@awiners.com', '@subcaro.com']
+
+SIGN_UP_URL_US = 'https://www.spotify.com/us/signup'
+SIGN_UP_URL_UK = 'https://www.spotify.com/uk/signup'
+SIGN_UP_URL_TR = 'https://www.spotify.com/tr/signup'
+
+API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
+API_REQ_URL = 'https://2captcha.com/in.php?'
+API_RES_URL = 'https://2captcha.com/res.php?'
+WEBDRIVER = 'src/webdriver/chromedriver.exe'
+
+WD_ERROR_BALANCE = 'ERROR_ZERO_BALANCE'
+WD_ERROR_FILESIZE = 'ERROR_ZERO_CAPTCHA_FILESIZE'
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+api_env = os.getenv('APIKEY_2CAPTCHA', API_KEY)
+solver = TwoCaptcha(API_KEY)
 
 
 class dob:
@@ -418,3 +436,43 @@ def fetch_image(amount):
 
             
     words.close()      
+
+
+def solve_captcha():
+    # Grab relevant recaptchaCheckboxKey from spotify signup page
+    print(">> Gathering reCaptcha information...")
+
+    html = requests.get(SIGN_UP_URL_US)                                                 # Gets HTML source
+    parsed = BeautifulSoup(html.text, 'html.parser')                                # Parses HTML response as raw HTML
+    json_res = parsed.find('script', id='__NEXT_DATA__', type='application/json')   # Finds <script> tag with captcha info
+
+    json_str = str(json_res)                        # Converts HTML response to string
+    json_str = json_str.removesuffix('</script>')   # Removes ending tag from string
+    json_str = json_str[92:]                        # Removes header tags with excess data
+
+    json_obj = json.loads(json_str)                 # Converts string to JSON object
+
+    # Gets checkbox key to send to TwoCaptcha API
+    recaptcha_checkbox_key = json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'] 
+    request_twocaptcha = API_REQ_URL + 'key=' + API_KEY + '&methoduserrecaptcha&googlekey=' + recaptcha_checkbox_key + '&pageurl=' + SIGN_UP_URL_US
+
+    print(">> reCaptcha information gathered:\n>>\t recaptchaCheckboxKey: " + recaptcha_checkbox_key)
+
+    try:
+        r = requests.get(request_twocaptcha)
+        time.sleep(60)
+
+        try:
+            r.raise_for_status()
+        except HTTPError as http_err:
+            print(f'HTTP request failed: {http_err}')
+
+        output = str(r.text)
+
+        if output in WD_ERROR_BALANCE:
+            print(">> 2Captcha Error: ERROR_ZERO_BALANCE returned\n>> Add funds to your 2Captcha account to proceed")
+            sys.exit()
+
+        print(r.text)    
+    except Exception as e:
+        print(e)
