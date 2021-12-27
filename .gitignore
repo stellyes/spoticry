@@ -1,6 +1,6 @@
 spoticry/src/json
 spoticry/src/img
 spoticry/src/webdriver/proxy.json
-spoticry/src/webdriver/sign_up
+spoticry/src/webdriver/sign_up/*
 spoticry/src/__pycache__
 
