@@ -18,27 +18,24 @@ from bs4 import BeautifulSoup
 from requests import HTTPError
 from twocaptcha import TwoCaptcha  
 
-PROXYLIST = "src/webdriver/proxy.json"
-PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
-BANNED_LOCATIONS = ["--", "HK", "CN"] 
-MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-DOMAINS = ['@mailkept.com', '@promail1.net', '@rcmails.com', '@relxv.com', '@folllo.com', '@fortuna7.com', '@invecra.com', '@linodg.com', '@awiners.com', '@subcaro.com']
+import datafy
 
-SIGN_UP_URL_US = 'https://www.spotify.com/us/signup'
-SIGN_UP_URL_UK = 'https://www.spotify.com/uk/signup'
-SIGN_UP_URL_TR = 'https://www.spotify.com/tr/signup'
 
-API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
-API_REQ_URL = 'https://2captcha.com/in.php?'
-API_RES_URL = 'https://2captcha.com/res.php?'
-WEBDRIVER = 'src/webdriver/chromedriver.exe'
+class pprint:
+    def __init__(self, message, bool_resposne, error, success):
+        message = self.message
+        bool_resposne = self.bool_resposne
+        error = self.error
+        success = self.success
 
-WD_ERROR_BALANCE = 'ERROR_ZERO_BALANCE'
-WD_ERROR_FILESIZE = 'ERROR_ZERO_CAPTCHA_FILESIZE'
+    def write(self, message):
+        print(">> " + message + "...", end="", flush=True)
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-api_env = os.getenv('APIKEY_2CAPTCHA', API_KEY)
-solver = TwoCaptcha(API_KEY)
+    def response(self, bool_response, error, success):
+        if (bool_response == True):
+            print(success)
+        else:
+            print(error)    
 
 
 class dob:
@@ -46,7 +43,6 @@ class dob:
         self.month = month
         self.day = day
         self.year = year
-
 
 def count(path):
     '''
@@ -149,7 +145,7 @@ def generate_email(domain_index):
 
     # Generate random string for email
     base_string = generate_username()
-    domain = DOMAINS[domain_index]
+    domain = datafy.DOMAINS[domain_index]
 
     email = base_string + domain
 
@@ -163,7 +159,7 @@ def generate_birthday(dob_month, dob_day, dob_year):
     Generate complete indexed date-of-birth object
     '''
 
-    month = MONTHS[dob_month]
+    month = datafy.MONTHS[dob_month]
     birthday = dob(month, dob_day, dob_year)
     return birthday
 
@@ -211,27 +207,28 @@ def update_proxy_list():
     '''
 
     # Delete old version of proxies.json
-    if os.path.exists(PROXYLIST):
-        os.remove(PROXYLIST)
+    if os.path.exists(datafy.PROXYLIST):
+        os.remove(datafy.PROXYLIST)
 
     # Create new version of proxies.json, offload parsed proxies into proxy.txt
-    with open(PROXYLIST, "a+") as proxies:
-        r = requests.get(PROXYFARM)                 # Pull data from webpage
+    with open(datafy.PROXYLIST, "a+") as proxies:
+        r = requests.get(datafy.PROXYFARM)                 # Pull data from webpage
         html = r.text                               # Convert data to string
         data = json.loads(html)                     # Load string as JSON
         proxies.write(json.dumps(data, indent=4))   # Write to file       
     
     # Parse and print proxy dictionary object to file
-    with open(PROXYLIST, "r") as proxies:
+    with open(datafy.PROXYLIST, "r") as proxies:
         data_json = json.load(proxies)              # Load JSON data
         data = data_json["data"]                    # Indicate parent to iterate
         for data in data:                                          
-            if not data['country'] in BANNED_LOCATIONS:             # Check to see if proxy is from banned country  
-                path = 'src/webdriver/sign_up/' + data['country'] + "/proxies/"
-                nof = count(path)
-                num = str(nof)                                                        # Convert file counter to str for file name
+            if  data['country'] in datafy.SUPPORTD_REGIONS:             # Check to see if proxy is from banned country  
+                path = 'src/webdriver/sign_up/' + data['country'] + "/proxies/"     
+                makedir(path)                                                   
+                nof = count(path)                                                       # Count files in output directory
+                num = str(nof)                                                          # Convert file counter to str for file name
                 zf = num.zfill(4)                                                       # proxy number prepended with fixed number of zeros
-                export = path + zf + '.json' # Path to proxy JSON file    
+                export = path + zf + '.json'                                            # Path to proxy JSON file    
                                 
                 ip = str(data['ip'] + ":" + data['port'])                       # Render IP
                 country = str(data['country'])                                  # Render country code
@@ -252,11 +249,11 @@ def update_proxy_list():
 
 def get_proxy_list():
     '''
-    Checks if proxylist is up to date, pulls new proxies if file outdated
+    Checks if datafy.PROXYLIST is up to date, pulls new proxies if file outdated
     '''
 
     # If proxy file does not exist, creates proxy.txt
-    if not os.path.exists(PROXYLIST):
+    if not os.path.exists(datafy.PROXYLIST):
         try:
             update_proxy_list()
         except OSError as e:
@@ -264,7 +261,7 @@ def get_proxy_list():
                 raise
 
     # Modified time and current time of proxy.txt            
-    last_modified = os.path.getmtime(PROXYLIST)
+    last_modified = os.path.getmtime(datafy.PROXYLIST)
     current_time = time.time()
 
     # Execute update of file if proxies outdated
@@ -365,12 +362,16 @@ def get_proxy():
 
     root = 'src/webdriver/sign_up/'
 
+    # Creates parent directory for individual country folders
     if not (os.path.isdir(root)):
         makedir(root)
 
-    directories = os.listdir(root)
+    directories = os.listdir(root)                      # 
     country = random.choice(directories)
     path = os.path.join(root + country + '/proxies')
+
+    if not (os.path.isdir(path)):
+        makedir(root)
 
     # Random choice in provided path
     proxyfile = path + '/' + random.choice(os.listdir(path))
@@ -436,43 +437,3 @@ def fetch_image(amount):
 
             
     words.close()      
-
-
-def solve_captcha():
-    # Grab relevant recaptchaCheckboxKey from spotify signup page
-    print(">> Gathering reCaptcha information...")
-
-    html = requests.get(SIGN_UP_URL_US)                                                 # Gets HTML source
-    parsed = BeautifulSoup(html.text, 'html.parser')                                # Parses HTML response as raw HTML
-    json_res = parsed.find('script', id='__NEXT_DATA__', type='application/json')   # Finds <script> tag with captcha info
-
-    json_str = str(json_res)                        # Converts HTML response to string
-    json_str = json_str.removesuffix('</script>')   # Removes ending tag from string
-    json_str = json_str[92:]                        # Removes header tags with excess data
-
-    json_obj = json.loads(json_str)                 # Converts string to JSON object
-
-    # Gets checkbox key to send to TwoCaptcha API
-    recaptcha_checkbox_key = json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'] 
-    request_twocaptcha = API_REQ_URL + 'key=' + API_KEY + '&methoduserrecaptcha&googlekey=' + recaptcha_checkbox_key + '&pageurl=' + SIGN_UP_URL_US
-
-    print(">> reCaptcha information gathered:\n>>\t recaptchaCheckboxKey: " + recaptcha_checkbox_key)
-
-    try:
-        r = requests.get(request_twocaptcha)
-        time.sleep(60)
-
-        try:
-            r.raise_for_status()
-        except HTTPError as http_err:
-            print(f'HTTP request failed: {http_err}')
-
-        output = str(r.text)
-
-        if output in WD_ERROR_BALANCE:
-            print(">> 2Captcha Error: ERROR_ZERO_BALANCE returned\n>> Add funds to your 2Captcha account to proceed")
-            sys.exit()
-
-        print(r.text)    
-    except Exception as e:
-        print(e)
