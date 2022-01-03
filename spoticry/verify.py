@@ -5,7 +5,9 @@ import json
 import random
 import requests
 from requests.exceptions import HTTPError
+
 import spoticore 
+import captcha
 
 from spoticore import pprint
 from selenium import webdriver
@@ -54,7 +56,7 @@ def sign_up(user):
 
     chrome_options = webdriver.ChromeOptions()                  # Options argument initalization
     # chrome_options.add_argument('--proxy-server=%s' % proxy)  # Assigns proxy
-    # chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
+    chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
     chrome_options.add_argument('--ignore-certificate-errors')  # Minimize console output
     chrome_options.add_argument('--ignore-ssl-errors')          # Minimize console output
     chrome_options.add_argument('log-level=3')                  # Minimize console output
@@ -96,19 +98,19 @@ def sign_up(user):
     time.sleep(random.randint(1, 9))
 
     # Locate and fill month portion of form
-    print(">>\t Filling date of birthmonth input box...")
+    print(">>\t Filling month input box...")
     dob_month_input = Select(web.find_element(By.XPATH, '//*[@id="month"]'))
     dob_month_input.select_by_visible_text(user['dob']['month'])
     time.sleep(random.randint(1, 9))
 
     # Locate and fill day portion of form
-    print(">>\t Filling date of birthday input box...")
+    print(">>\t Filling day input box...")
     dob_day_input = web.find_element(By.XPATH, '//*[@id="day"]')
     dob_day_input.send_keys(user['dob']['day'])
     time.sleep(random.randint(1, 9))
 
     # Locate and fill year portion of form
-    print(">>\t Filling date of birth year box...")
+    print(">>\t Filling date of year box...")
     dob_year_input = web.find_element(By.XPATH, '//*[@id="year"]')
     dob_year_input.send_keys(user['dob']['year'])
     time.sleep(random.randint(1, 9))
@@ -142,9 +144,11 @@ def sign_up(user):
 
     # Solve Captcha
     print(">>\t Solving reCaptcha...")
-    WebDriverWait(web, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id=\"checkbox-container\"]/div/div/iframe")))
-    web.execute_script("arguments[0].click();", WebDriverWait(web, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox']/div[@class='recaptcha-checkbox-checkmark']"))))
-    
+    #WebDriverWait(web, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id=\"checkbox-container\"]/div/div/iframe")))
+    #web.execute_script("arguments[0].click();", WebDriverWait(web, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox']/div[@class='recaptcha-checkbox-checkmark']"))))
+    print(captcha.solve(web.current_url, ))
+
+
     # Initialize temp-mail inbox
     response, data = get_email(user['md5_hash'])
 

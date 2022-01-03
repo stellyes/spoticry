@@ -333,7 +333,7 @@ def clear_proxies():
     
     # Iterate through directories and delete respective proxy data
     for directory in directories:
-        proxies = 'src/webdriver/sign_up/' + directory + '/proxies'
+        proxies = 'src/webdriver/sign_up/' + directory
 
         if os.path.isdir(proxies):
             for item in os.scandir(proxies):
@@ -368,7 +368,7 @@ def get_proxy():
 
     directories = os.listdir(root)                      # 
     country = random.choice(directories)
-    path = os.path.join(root + country + '/proxies')
+    path = os.path.join(root + country)
 
     if not (os.path.isdir(path)):
         makedir(root)
