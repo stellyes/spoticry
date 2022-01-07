@@ -2,12 +2,15 @@ import os
 import sys
 import time
 import json
+import utils
 import random
 import requests
-from requests.exceptions import HTTPError
 import spoticore 
 
-from spoticore import pprint
+from requests.exceptions import HTTPError
+
+from bs4 import BeautifulSoup
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -15,22 +18,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-def get_email(md5):
+MAIL_API_KEY = '?_mailsacKey=k_Gdc5XksqCSrfjILfwnaUilpCPRrOf70fbA2g99d3'
+CAPTCHA_API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
+API_REQ_URL = 'https://2captcha.com/in.php?'
+API_RES_URL = 'https://2captcha.com/res.php?'
+
+
+def init_email(email):
 
     http_response = 400
 
-    url = "https://privatix-temp-mail-v1.p.rapidapi.com/request/mail/id/" + md5 + "/"
-
-    head = {
-        'x-rapidapi-host': "privatix-temp-mail-v1.p.rapidapi.com",
-        'x-rapidapi-key': "da6d75ca4emsh6141adc1de07170p15d12ajsn08a3f957a221"
-    } 
+    url = "https://mailsac.com/api/addresses/" + email + MAIL_API_KEY
 
     try:
-        r = requests.get(
-            url, 
-            headers=head
-        )
+        r = requests.post(url)
 
         try:
             r.raise_for_status()
@@ -45,6 +46,47 @@ def get_email(md5):
         print(f'Other error occured during email fetch: {err}')
 
     return http_response, r
+
+
+def verify_account(email):
+
+    http_response = 400
+
+    url = "https://mailsac.com/api/addresses/" + email + "/messages" + MAIL_API_KEY
+
+    try:
+        r = requests.get(url)
+
+        try:
+            r.raise_for_status()
+        except HTTPError as http_err:
+            print(f'HTTP request failed: {http_err}')
+
+        http_response = 200     
+
+    except HTTPError as http_err:
+        print(f'HTTP error occured: {http_err}')
+    except Exception as err:
+        print(f'Other error occured during email fetch: {err}')
+
+    return http_response, r
+
+def captcha_solver():
+    print(">> Gathering reCaptcha information...")
+
+    html = requests.get(utils.SIGN_UP_URL_US)                                                 # Gets HTML source
+    parsed = BeautifulSoup(html.text, 'html.parser')                                # Parses HTML response as raw HTML
+    json_res = parsed.find('script', id='__NEXT_DATA__', type='application/json')   # Finds <script> tag with captcha info
+    json_str = str(json_res)                        # Converts HTML response to string
+    json_str = json_str.removesuffix('</script>')   # Removes ending tag from string
+    json_str = json_str[92:]                        # Removes header tags with excess data
+
+    json_obj = json.loads(json_str)
+    json_obj = json.loads(json_str)                 # Converts string to JSON object
+
+    print("recaptchaCheckboxKey: " + json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'])
+    sys.exit()
+   
 
 def sign_up(user):
     # Handles sign-up process using generated user info
@@ -67,8 +109,7 @@ def sign_up(user):
 
     # Open Spotify sign-up URL via webdriver
     print(">> Loading webpage...")
-    web.get(spoticore.SIGN_UP_URL_US) 
-    print(">> Webpage loaded")
+    web.get(utils.SIGN_UP_URL_US) 
     time.sleep(random.randint(3, 12))
 
     # Locate and fill email portion of form
@@ -96,19 +137,19 @@ def sign_up(user):
     time.sleep(random.randint(1, 9))
 
     # Locate and fill month portion of form
-    print(">>\t Filling date of birthmonth input box...")
+    print(">>\t Filling month of birth input box...")
     dob_month_input = Select(web.find_element(By.XPATH, '//*[@id="month"]'))
     dob_month_input.select_by_visible_text(user['dob']['month'])
     time.sleep(random.randint(1, 9))
 
     # Locate and fill day portion of form
-    print(">>\t Filling date of birthday input box...")
+    print(">>\t Filling day of birth input box...")
     dob_day_input = web.find_element(By.XPATH, '//*[@id="day"]')
     dob_day_input.send_keys(user['dob']['day'])
     time.sleep(random.randint(1, 9))
 
     # Locate and fill year portion of form
-    print(">>\t Filling date of birth year box...")
+    print(">>\t Filling year of birth year box...")
     dob_year_input = web.find_element(By.XPATH, '//*[@id="year"]')
     dob_year_input.send_keys(user['dob']['year'])
     time.sleep(random.randint(1, 9))
@@ -145,10 +186,29 @@ def sign_up(user):
     WebDriverWait(web, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id=\"checkbox-container\"]/div/div/iframe")))
     web.execute_script("arguments[0].click();", WebDriverWait(web, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox']/div[@class='recaptcha-checkbox-checkmark']"))))
     
-    # Initialize temp-mail inbox
-    response, data = get_email(user['md5_hash'])
+    # Initialize temporary mail inbox
+    print(">>\t Initializing inbox to recieve verification email...")
+    response1, data1 = init_email(user['email'])
 
-    print('[' + response + ']:\n[DATA]: \n' + data)
+    if not response1 == 200:
+        print(">> ERROR: Email initialization failed.")
+        return "failed", time.time()  
+
+    # Send sign up data
+    signup_button = Select(web.find_element(By.CLASS_NAME, 'Button-qlcn5g-0 dmJlSg'))
+    signup_button.select_by_visible_text("Sign up")
+
+    time.sleep(random.randint(1, 9)) 
+
+    # Get verification email
+    print(">>\t Verifying account...")
+    response2, data2 = verify_account(user['email'])
+    print(data2)
+
+    if not response2 == 200:
+        print(">> ERROR: Email initialization failed.")
+        return "failed", time.time() 
+
     sys.exit()
 
 
