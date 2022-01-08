@@ -1,10 +1,13 @@
 import os
 import sys
 import json
+import time
 import utils
 import errno
 import shutil
 import random
+import urllib
+import socket
 import pathlib
 import requests
 import datetime
@@ -45,8 +48,158 @@ def update_records(data):
             json.dump(data, x, indent=4)
     except:
         print("\n>>> ERROR\n>>> Could not create JSON file\n")
- 
 
+
+def update_proxy_list():
+    '''
+    Grabs proxy list from latest update on genode.com
+    List updates every ten minutes, if proxy.txt is
+    older than 10 minutes
+    '''
+
+    # Delete old version of proxies.json
+    if os.path.exists(utils.PROXYLIST):
+        os.remove(utils.PROXYLIST)
+
+    # Create new version of proxies.json, offload parsed proxies into proxy.txt
+    with open(utils.PROXYLIST, "a+") as proxies:
+        r = requests.get(utils.PROXYFARM)                 # Pull data from webpage
+        html = r.text                               # Convert data to string
+        data = json.loads(html)                     # Load string as JSON
+        proxies.write(json.dumps(data, indent=4))   # Write to file       
+    
+    # Parse and print proxy dictionary object to file
+    with open(utils.PROXYLIST, "r") as proxies:
+        data_json = json.load(proxies)              # Load JSON data
+        data = data_json["data"]                    # Indicate parent to iterate
+        for data in data:                                          
+            if  data['country'] in utils.SUPPORTD_REGIONS:             # Check to see if proxy is from banned country  
+                path = 'src/webdriver/sign_up/' + data['country'] + "/proxies/"     
+                makedir(path)                                                   
+                nof = utils.count(path)                                                       # Count files in output directory
+                num = str(nof)                                                          # Convert file counter to str for file name
+                zf = num.zfill(4)                                                       # proxy number prepended with fixed number of zeros
+                export = path + zf + '.json'                                            # Path to proxy JSON file    
+                                
+                ip = str(data['ip'] + ":" + data['port'])                       # Render IP
+                country = str(data['country'])                                  # Render country code
+                protocol = str(data['protocols'])[1:-1].lstrip("'").rstrip("'") # Render protocol
+                
+                # Create proxy object
+                proxy = {
+                    "ip": ip,
+                    "country": country,
+                    "protocol": protocol
+                }                   
+                
+                with open(export, 'a+') as x:
+                        json.dump(proxy, x, indent=4)               
+
+            nof += 1                  
+
+
+def get_proxy_list():
+    '''
+    Checks if utils.PROXYLIST is up to date, pulls new proxies if file outdated
+    '''
+
+    # If proxy file does not exist, creates proxy.txt
+    if not os.path.exists(utils.PROXYLIST):
+        try:
+            update_proxy_list()
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    # Modified time and current time of proxy.txt            
+    last_modified = os.path.getmtime(utils.PROXYLIST)
+    current_time = time.time()
+
+    # Execute update of file if proxies outdated
+    if (current_time - last_modified) > 600:
+        print(">>\t Proxy list outdated. Grabbing latest proxy list")
+        clear_proxies()
+        update_proxy_list()
+
+
+def test_connection(proxy):
+    '''
+    Pings address using selected proxy to test connection
+
+    Status Codes:
+       0 = Uninitialized
+       1 = Failed
+       2 = Success
+       3 = Debug
+    '''
+
+    statuscode = 0                  
+    socket.setdefaulttimeout(120)   # Threshold for testing proxy timeout
+    ping = False                    # Results set to false at initialization, changed to true if pinged
+
+    try:
+        proxy_handler = urllib.request.ProxyHandler({'http': proxy})
+        opener = urllib.request.build_opener(proxy_handler)
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urllib.request.install_opener(opener)
+        req = urllib.request.Request('https://deoautemnihil.bandcamp.com/')
+        ping = True
+    except urllib.error.HTTPError as e:
+        print('>> ERROR: ', e.code)
+        return e.code
+    except Exception as detail:
+        print(detail) 
+    
+    if not ping:
+        statuscode = 1
+        print('>>\tERROR: ' + proxy + ' has expired')
+    else:
+        print('>>\t Proxy connection successful') 
+        statuscode = 2
+
+    return statuscode
+
+
+def makedir(path):
+    '''
+    Creates directory if proxy folder does note exist
+    '''   
+
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+
+def clear_proxies():
+    '''
+    Removes all proxy data from subdirectories
+    '''
+
+    # Get subdirectory names associated with each country
+    makedir('src/webdriver/sign_up')
+    directories = os.listdir('src/webdriver/sign_up')
+    
+    # Iterate through directories and delete respective proxy data
+    for directory in directories:
+        proxies = 'src/webdriver/sign_up/' + directory
+
+        if os.path.isdir(proxies):
+            for item in os.scandir(proxies):
+                try:
+                    shutil.rmtree(item)
+                except OSError:
+                    os.remove(item)
+            shutil.rmtree(proxies)       
+
+    try:
+        shutil.rmtree('src/webdriver/proxy.json') 
+    except OSError:
+        os.remove('src/webdriver/proxy.json')
+    
+    
 def get_proxy():
     '''
     Pick random proxy file in directorty
