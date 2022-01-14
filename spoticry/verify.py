@@ -18,6 +18,11 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import pydub
+import ffmpy
+import urllib
+import speech_recognition as sr
+
 
 MAIL_API_KEY = '?_mailsacKey=k_Gdc5XksqCSrfjILfwnaUilpCPRrOf70fbA2g99d3'
 CAPTCHA_API_KEY = 'cfdd1e0dafb83224e79a5ade1e9191a9'
@@ -72,7 +77,13 @@ def verify_account(email):
 
     return http_response, r
 
-def captcha_solver():
+def captcha_id():
+    '''
+    returns captcha id for page
+    
+    '''
+
+
     print(">> Gathering reCaptcha information...")
 
     html = requests.get(utils.SIGN_UP_URL_US)                                                 # Gets HTML source
@@ -85,9 +96,11 @@ def captcha_solver():
     json_obj = json.loads(json_str)
     json_obj = json.loads(json_str)                 # Converts string to JSON object
 
-    print("recaptchaCheckboxKey: " + json_obj['props']['pageProps']['data']['recaptchaCheckboxKey'])
-    sys.exit()
-   
+    solved = json_obj['props']['pageProps']['data']['recaptchaCheckboxKey']
+    print("recaptchaCheckboxKey: " + solved)
+
+    return solved
+    
 
 def sign_up(user):
     # Handles sign-up process using generated user info
@@ -97,21 +110,16 @@ def sign_up(user):
 
     chrome_options = webdriver.ChromeOptions()                  # Options argument initalization
     # chrome_options.add_argument('--proxy-server=%s' % proxy)  # Assigns proxy
-    chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
+    # chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
     chrome_options.add_argument('--ignore-certificate-errors')  # Minimize console output
     chrome_options.add_argument('--ignore-ssl-errors')          # Minimize console output
     chrome_options.add_argument('log-level=3')                  # Minimize console output
     
     # Use Google Chrome webdriver to handle form filling      
-    web = webdriver.Chrome(
-        executable_path=('src/webdriver/chromedriver.exe'), 
-        options=chrome_options
-        ) 
-
-    # Open Spotify sign-up URL via webdriver
+    web = webdriver.Chrome(executable_path='src/webdriver/chromedriver.exe', options=chrome_options)
     print(">> Loading webpage...")
     web.get(utils.SIGN_UP_URL_US) 
-    time.sleep(random.randint(3, 12))
+    time.sleep(random.randint(5, 12))
 
     # Locate and fill email portion of form
     print(">>\t Filling email input box...")
@@ -160,14 +168,14 @@ def sign_up(user):
 
     print(">>\t Filling gender...")
     if gender == 0:
-        male = web.find_element(By.XPATH, '//*[@id="__next"]/main/div[2]/div/form/fieldset/div/div[1]/label/span[1]')
-        male.click()
+        WebDriverWait(web, 20).until(EC.invisibility_of_element((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[1]/label")))
+        web.execute_script("arguments[0].click();", WebDriverWait(web, 20).until(EC.element_to_be_clickable((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[1]/label"))))
     elif gender == 1:
-        female = web.find_element(By.XPATH, '//*[@id="__next"]/main/div[2]/div/form/fieldset/div/div[2]/label/span[1]')
-        female.click()
+        WebDriverWait(web, 20).until(EC.invisibility_of_element((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[1]/label")))
+        web.execute_script("arguments[0].click();", WebDriverWait(web, 20).until(EC.element_to_be_clickable((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[2]/label"))))
     elif gender == 2:
-        nonbinary = web.find_element(By.XPATH, '//*[@id="__next"]/main/div[2]/div/form/fieldset/div/div[3]/label/span[1]')
-        nonbinary.click()
+        WebDriverWait(web, 20).until(EC.invisibility_of_element((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[1]/label")))
+        web.execute_script("arguments[0].click();", WebDriverWait(web, 20).until(EC.element_to_be_clickable((By.XPATH, "//*[@id=\"__next\"]/main/div[2]/div/form/fieldset/div/div[3]/label"))))
     else:
         print(">> ERROR:\n>> Invalid gender input")
         return False
@@ -187,28 +195,31 @@ def sign_up(user):
 
     WebDriverWait(web, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//*[@id=\"checkbox-container\"]/div/div/iframe")))
     web.execute_script("arguments[0].click();", WebDriverWait(web, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[@class='recaptcha-checkbox goog-inline-block recaptcha-checkbox-unchecked rc-anchor-checkbox']/div[@class='recaptcha-checkbox-checkmark']"))))
+    time.sleep(random.randomint(5, 10))
 
-    sys.exit()
+    # Sign up button
+    WebDriverWait(web, 20).until(EC.invisibility_of_element((By.CLASS_NAME, "Button-qlcn5g-0 dmJlSg")))
+    web.execute_script("arguments[0].click();", WebDriverWait(web, 20).until(EC.element_to_be_clickable((By.CLASS_NAME, "Button-qlcn5g-0 dmJlSg"))))
+    
 
 
 
 def main():
     newUser = {
-        "email": "GlazenerMahlon@invecra.com",
-        "user": "cabinJohannesen",
-        "pass": "m_|2^r&Sf0t2",
+        "email": "idolater1@mailsac.com",
+        "user": "flatuousMarissa",
+        "pass": "(Q:$Eo|u7",
         "dob": {
-            "day": 7,
-            "month": "March",
-            "year": 2003
+            "day": 26,
+            "month": "February",
+            "year": 1991
         },
-        "gender": 2,
-        "opt_in": 1,
-        "md5_hash": "cf953d3ec639b6caf09ab50a7a52d0e2",
+        "gender": 0,
+        "opt_in": 0,
         "proxy": {
-            "ip": "188.132.241.162:56109",
-            "country": "TR",
-            "protocol": "socks5"
+            "ip": "200.30.170.82:8080",
+            "country": "GT",
+            "protocol": "http"
         },
         "verified": {
             "status": "",

@@ -222,10 +222,8 @@ def generate_birthday(dob_month, dob_day, dob_year):
     '''
     Generate complete indexed date-of-birth object
     '''
-
-    month = MONTHS[dob_month]
-    birthday = dob(month, dob_day, dob_year)
-    return birthday
+    #month = MONTHS[dob_month]
+    return dob(dob_month, dob_day, dob_year)
 
 
 def clear_proxies():

@@ -1,6 +1,6 @@
 import utils
-import verify
 import random
+import generate
 import spoticore
 
 
@@ -32,9 +32,9 @@ def main():
         marketing_info = random.randint(0, 1)
 
         # utils random proxy from list of scraped proxies
-        print(">> Fetching proxy information...")
+        # print(">> Fetching proxy information...")
         proxy_info = utils.get_proxy()
-        print(">>\t Proxy " + proxy_info['ip'] + " selected")
+        # print(">>\t Proxy " + proxy_info['ip'] + " selected")
 
         # If proxy fails connection, get new proxy value to assign
         #print(">>\t Testing connection: " + proxy_info['ip'] + "...")
@@ -47,7 +47,7 @@ def main():
 
         # Create spotifyUser dictionary
         newUser = {
-            "email": email,
+            "email": "dawine9023@leezro.com",
             "user": username,
             "pass": password,
             "dob": {
@@ -58,6 +58,10 @@ def main():
             "gender": gender,
             "opt_in": marketing_info,
             "proxy": proxy_info,
+            "created": {
+                "status": '',
+                "date": ''
+            },
             "verified": {
                 "status": '',
                 "date": ''
@@ -66,7 +70,7 @@ def main():
 
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
-        status, date = verify.sign_up(newUser)
+        status, date = generate.generate_user(newUser)
 
         # Print generated user to JSON file
         spoticore.update_records(newUser)
