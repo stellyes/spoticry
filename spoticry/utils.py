@@ -1,7 +1,9 @@
 import os
+import sys
 import time
 import json
 import errno
+import boto3
 import socket
 import string
 import random
@@ -9,7 +11,12 @@ import urllib
 import shutil
 import pathlib
 import requests
+import datetime
 
+from requests import HTTPError 
+
+
+# Supported regions for Spotify
 SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
                      "CA", "CL", "CO", "CR", "CY", "CZ", "DK", "DO",
                      "EC", "SV", "EE", "FI", "FR", "DE", "GR", "GT",
@@ -20,76 +27,8 @@ SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
                      "ZA", "KR", "ES", "SE", "CH", "TW", "TH", "TR",
                      "AE", "UK", "US", "UY", "VN"]
 
-# Sign up URLs for each country supported by Spotify
-SIGN_UP_URL_AD = 'https://www.spotify.com/ad/signup'    # Andorra
-SIGN_UP_URL_AR = 'https://www.spotify.com/ar/signup'    # Argentina
-SIGN_UP_URL_AS = 'https://www.spotify.com/as/signup'    # Australia
-SIGN_UP_URL_AT = 'https://www.spotify.com/at/signup'    # Austria
-SIGN_UP_URL_BE = 'https://www.spotify.com/be/signup'    # Belgium
-SIGN_UP_URL_BO = 'https://www.spotify.com/bo/signup'    # Bolivia
-SIGN_UP_URL_BR = 'https://www.spotify.com/br/signup'    # Brazil
-SIGN_UP_URL_BG = 'https://www.spotify.com/bg/signup'    # Bulgaria
-SIGN_UP_URL_CA = 'https://www.spotify.com/ca/signup'    # Canada
-SIGN_UP_URL_CL = 'https://www.spotify.com/cl/signup'    # Chile
-SIGN_UP_URL_CO = 'https://www.spotify.com/co/signup'    # Colombia
-SIGN_UP_URL_CR = 'https://www.spotify.com/cr/signup'    # Costa Rica
-SIGN_UP_URL_CY = 'https://www.spotify.com/cy/signup'    # Cyprus
-SIGN_UP_URL_CZ = 'https://www.spotify.com/cz/signup'    # Czech Republic
-SIGN_UP_URL_DK = 'https://www.spotify.com/dk/signup'    # Denmark
-SIGN_UP_URL_DO = 'https://www.spotify.com/do/signup'    # Dominican Republic
-SIGN_UP_URL_EC = 'https://www.spotify.com/ec/signup'    # Ecuador
-SIGN_UP_URL_SV = 'https://www.spotify.com/sv/signup'    # El Salvador
-SIGN_UP_URL_EE = 'https://www.spotify.com/ee/signup'    # Ecuador
-SIGN_UP_URL_FI = 'https://www.spotify.com/fi/signup'    # Finland
-SIGN_UP_URL_FR = 'https://www.spotify.com/fr/signup'    # France
-SIGN_UP_URL_DE = 'https://www.spotify.com/de/signup'    # Germany
-SIGN_UP_URL_GR = 'https://www.spotify.com/gr/signup'    # Greece
-SIGN_UP_URL_GT = 'https://www.spotify.com/gt/signup'    # Guatemala
-SIGN_UP_URL_HN = 'https://www.spotify.com/hn/signup'    # Honduras
-SIGN_UP_URL_HU = 'https://www.spotify.com/hu/signup'    # Hungary
-SIGN_UP_URL_IS = 'https://www.spotify.com/is/signup'    # Iceland
-SIGN_UP_URL_IN = 'https://www.spotify.com/in/signup'    # India
-SIGN_UP_URL_ID = 'https://www.spotify.com/id/signup'    # Indonesia
-SIGN_UP_URL_IE = 'https://www.spotify.com/ie/signup'    # Ireland
-SIGN_UP_URL_IL = 'https://www.spotify.com/il/signup'    # Israel
-SIGN_UP_URL_IT = 'https://www.spotify.com/it/signup'    # Italy
-SIGN_UP_URL_JP = 'https://www.spotify.com/jp/signup'    # Japan
-SIGN_UP_URL_LV = 'https://www.spotify.com/lv/signup'    # Latvia
-SIGN_UP_URL_LI = 'https://www.spotify.com/li/signup'    # Liechtenstein
-SIGN_UP_URL_LT = 'https://www.spotify.com/lt/signup'    # Lithuania
-SIGN_UP_URL_LU = 'https://www.spotify.com/lu/signup'    # Luxembourg
-SIGN_UP_URL_MY = 'https://www.spotify.com/my/signup'    # Malaysia
-SIGN_UP_URL_MT = 'https://www.spotify.com/mt/signup'    # Malta
-SIGN_UP_URL_MX = 'https://www.spotify.com/mx/signup'    # Mexico
-SIGN_UP_URL_MC = 'https://www.spotify.com/mc/signup'    # Monaco
-SIGN_UP_URL_NL = 'https://www.spotify.com/nl/signup'    # Netherlands
-SIGN_UP_URL_NZ = 'https://www.spotify.com/nz/signup'    # New Zealand
-SIGN_UP_URL_NI = 'https://www.spotify.com/ni/signup'    # Nicaragua
-SIGN_UP_URL_NO = 'https://www.spotify.com/no/signup'    # Norway
-SIGN_UP_URL_PA = 'https://www.spotify.com/pa/signup'    # Panama
-SIGN_UP_URL_PY = 'https://www.spotify.com/py/signup'    # Paraguay
-SIGN_UP_URL_PE = 'https://www.spotify.com/pe/signup'    # Peru
-SIGN_UP_URL_PH = 'https://www.spotify.com/ph/signup'    # Philippines
-SIGN_UP_URL_PL = 'https://www.spotify.com/pl/signup'    # Poland
-SIGN_UP_URL_PT = 'https://www.spotify.com/pt/signup'    # Portugal
-SIGN_UP_URL_RO = 'https://www.spotify.com/ro/signup'    # Romania
-SIGN_UP_URL_RU = 'https://www.spotify.com/ru/signup'    # Russia
-SIGN_UP_URL_SA = 'https://www.spotify.com/sa/signup'    # Saudi Arabia
-SIGN_UP_URL_SG = 'https://www.spotify.com/sg/signup'    # Singapore
-SIGN_UP_URL_SK = 'https://www.spotify.com/sk/signup'    # Slovakia
-SIGN_UP_URL_ZA = 'https://www.spotify.com/za/signup'    # South Africa
-SIGN_UP_URL_KR = 'https://www.spotify.com/kr/signup'    # South Korea
-SIGN_UP_URL_ES = 'https://www.spotify.com/es/signup'    # Spain
-SIGN_UP_URL_SE = 'https://www.spotify.com/se/signup'    # Sweden
-SIGN_UP_URL_CH = 'https://www.spotify.com/ch/signup'    # Switzerland
-SIGN_UP_URL_TW = 'https://www.spotify.com/tw/signup'    # Taiwan
-SIGN_UP_URL_TH = 'https://www.spotify.com/th/signup'    # Thailand
-SIGN_UP_URL_TR = 'https://www.spotify.com/tr/signup'    # Turkey
-SIGN_UP_URL_AE = 'https://www.spotify.com/ae/signup'    # United Arab Emirates
-SIGN_UP_URL_UK = 'https://www.spotify.com/uk/signup'    # United Kingdom
-SIGN_UP_URL_US = 'https://www.spotify.com/us/signup'    # United States
-SIGN_UP_URL_UY = 'https://www.spotify.com/uy/signup'    # Uruguay
-SIGN_UP_URL_VN = 'https://www.spotify.com/vn/signup'    # Vietnam
+# Organization ID for rengland.org mailing list
+WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
 
 # Written out for profile generation and webdriver input
 MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -99,6 +38,17 @@ WEBDRIVER = 'src/webdriver/chromedriver.exe'
 PROXYLIST = "src/webdriver/proxy.json"
 PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 class dob:
     def __init__(self, month, day, year):
@@ -137,6 +87,7 @@ def count(path):
 
     return nof 
 
+
 def select_entry(filename):
     '''
     Selects random string from random line in text document
@@ -147,6 +98,23 @@ def select_entry(filename):
         words = list(map(str, text.split()))
     doc.close()
     return random.choice(words)
+
+
+def generate_random_string(length): 
+    '''
+    Generates random string letters and numbers inclusive
+    '''
+
+    pool=string.ascii_lowercase+string.digits
+    return "".join(random.choice(pool) for i in range(length))
+
+
+def generate_random_text(length):
+    '''
+    Generates random string exclusively characters
+    '''
+
+    return "".join(random.choice(string.ascii_lowercase) for i in range(length))
 
 
 def generate_password(length):
@@ -396,3 +364,122 @@ def get_proxy():
         obj = json.loads(doc.read())
 
     return obj 
+
+
+def update_records(data):
+    '''
+    Updates JSON records with aggregated, generated user infomration
+    '''
+
+    __dir = os.path.join('src/json')    # JSON output directory
+    __nof = 0                           # Number of files in output directory
+
+    # Creates directory if __dir does note exist
+    if not os.path.exists(__dir):
+        try:
+            os.makedirs(__dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+    # Count number of JSON files in directory
+    for path in pathlib.Path("src/json").iterdir():
+        if path.is_file():
+            __nof += 1
+
+    # Convert file counter to str for file name
+    num = str(__nof)
+    # Account number prepended with fixed number of zeros
+    zf = num.zfill(6)
+    export = 'src/json/' + zf + '.json'    # Path to account JSON file
+
+    try:
+        with open(export, 'x') as x:
+            json.dump(data, x, indent=4)
+    except:
+        print("\n>>> ERROR\n>>> Could not create JSON file\n")  
+
+
+def fetch_image(amount):
+    '''
+    Generates requested amount of images
+    '''
+
+    APIKEY = '075fc857-3a70-4fd8-a129-ba1cf2e62335'
+
+    with open("src/txt/words.txt", "r") as words:
+        for i in range(amount):
+            for line in words:
+                try:
+                    case = line.strip()
+                
+                    # Many thanks to DeepAI for this beautiful AI model, and also
+                    # making it free to use (for the most part)
+                    #
+                    # See more here: https://deepai.org/machine-learning-model/text2img
+
+                    r = requests.post(
+                        "https://api.deepai.org/api/text2img",
+                        files={
+                            'text': case,
+                        },
+                        headers={
+                            'api-key': APIKEY
+                        }
+                    )
+
+                    # Check if API request passed
+                    try:
+                        r.raise_for_status()
+                    except HTTPError as http_err:
+                        print(f'HTTP request failed: {http_err}')
+
+                    print("Image successfully generated using \'" + case + "\'.")
+
+                    # Generate unique, timestamped file name for image
+                    gen_filename = 'src/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
+
+                    # Parse JSON stream and write to image file
+                    url = r.json().get('output_url')
+                    image = requests.get(url, stream=True)
+                    image.raw.decode_content = True
+                    with open(gen_filename, 'wb') as i:
+                        shutil.copyfileobj(image.raw, i)
+
+                    print('Image successfully saved:\n\t >> ' + gen_filename)
+                except HTTPError as http_err:
+                    print(f'HTTP error occured: {http_err}')
+                except Exception as err:
+                    print(f'Other error occured during image fetch: {err}')
+
+            
+    words.close()          
+
+
+def create_email(username, password):
+
+    # Initialize AWS WorkMail Client
+    client = boto3.client('workmail')
+
+    try:
+        # Create new email user
+        response = client.create_user(
+            OrganizationId = WEBMAIL_ORG_ID, 
+            Name = username,
+            DisplayName = username,
+            Password = password
+        )
+    except client.exceptions.NameAvailabilityException as NAE:
+        print(">>\t ERROR: Name not available, renaming user and retrying...")
+        
+        try:
+            # Create new email user with new randomly generated username
+            response = client.create_user(
+                OrganizationId = WEBMAIL_ORG_ID, 
+                Name = generate_username(),
+                DisplayName = username,
+                Password = password
+            )
+        except:
+            print(">> " + bcolors.WARNING + "FATAL ERROR: Failed to initialize email for user " + username + ". Shutting down..." + bcolors.ENDC)   
+            sys.exit()   

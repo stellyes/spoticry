@@ -1,6 +1,5 @@
 import utils
 import random
-import generate
 import spoticore
 
 
@@ -70,10 +69,10 @@ def main():
 
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
-        status, date = generate.generate_user(newUser)
+        status, date = spoticore.generate_user(newUser)
 
         # Print generated user to JSON file
-        spoticore.update_records(newUser)
+        utils.update_records(newUser)
 
         print(">> User " + newUser["user"] + " successfully generated\n")
 
