@@ -29,18 +29,8 @@ def main():
         gender = random.randint(0, 2)
         # utils random response to marketing infomation
         marketing_info = random.randint(0, 1)
-
         # utils random proxy from list of scraped proxies
-        # print(">> Fetching proxy information...")
         proxy_info = utils.get_proxy()
-        # print(">>\t Proxy " + proxy_info['ip'] + " selected")
-
-        # If proxy fails connection, get new proxy value to assign
-        #print(">>\t Testing connection: " + proxy_info['ip'] + "...")
-        #if (utils.test_connection(proxy_info['ip']) < 2):    
-            #print(">>\t Testing connection: " + proxy_info['ip'] + "...")
-            #proxy_info = utils.get_proxy()
-            #print(">> Proxy " + proxy_info['ip'] + " selected")
 
         print(">> Credentials for " + username + " generated")
 
