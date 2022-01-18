@@ -10,7 +10,6 @@ import random
 import urllib
 import shutil
 import pathlib
-import botocore
 import requests
 import datetime
 
@@ -30,6 +29,9 @@ SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
 
 # Organization ID for rengland.org mailing list
 WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
+
+# AWS Region
+REGION = 'us-west-2'
 
 # Written out for profile generation and webdriver input
 MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -200,13 +202,12 @@ def get_proxy():
     Pick random proxy server in directorty
     '''  
 
-    root = 'src/proxies/'                     # 
-    country = random.choice(root)
+    root = 'src/proxies/'  
+    file = random.choice(os.listdir(root))                   
+    country = root + file
     proxy = select_entry(country)
-    print(proxy)
-    sys.exit()
 
-    return proxy 
+    return { "ip": proxy, "country": file.removesuffix('.txt') } 
 
 
 def update_records(data):
@@ -302,18 +303,19 @@ def fetch_image(amount):
 def create_email(username, password):
 
     # Initialize AWS WorkMail Client
-    client = boto3.client('workmail')
+    client = boto3.client('workmail', region_name=REGION)
 
     try:
         # Create new email user
-        response = client.create_user(
+        print(client.create_user(
             OrganizationId = WEBMAIL_ORG_ID, 
             Name = username,
             DisplayName = username,
             Password = password
-        )
+        ))
 
         return True
     except:
-        print(">> " + bcolors.WARNING + "FATAL ERROR: Failed to initialize email for user " + username + ". Shutting down..." + bcolors.ENDC)   
+
+        print(">> " + bcolors.FAIL + "FATAL ERROR: Failed to initialize email for user " + username + ". Shutting down..." + bcolors.ENDC)   
         return False

@@ -1,3 +1,4 @@
+import sys
 import utils
 import random
 import spoticore
@@ -16,27 +17,35 @@ def main():
         dob_day = random.randint(1, 28)
         dob_year = random.randint(1982, 2006)
 
-        # utils spotifyUser data
-        # utils temp email address and email MD5 hash token
+        # Generate spotifyUser data
+        # Generate temp email address and email MD5 hash token
         email = utils.generate_email(domain_index)
-        # utils random username
+        print(email)
+        # Generate random username
         username = utils.generate_username()
-        # utils random password
+        # Generate random password
         password = utils.generate_password(password_length)
-        # utils random birthday
+        # Generate random birthday
         birthday = utils.generate_birthday(dob_month, dob_day, dob_year)
-        # utils random gender selection
+        # Generate random gender selection
         gender = random.randint(0, 2)
-        # utils random response to marketing infomation
+        # Generate random response to marketing infomation
         marketing_info = random.randint(0, 1)
-        # utils random proxy from list of scraped proxies
+        # Generate random proxy from list of scraped proxies
         proxy_info = utils.get_proxy()
 
         print(">> Credentials for " + username + " generated")
 
+        # Create email user in AWS
+        #print(">> Initializing email in AWS WorkMail...")
+        #resp = utils.create_email(username, password)
+
+        #if resp == False:
+        #    sys.exit()
+
         # Create spotifyUser dictionary
         newUser = {
-            "email": "dawine9023@leezro.com",
+            "email": email,
             "user": username,
             "pass": password,
             "dob": {
@@ -56,10 +65,14 @@ def main():
                 "date": ''
             }
         }
+        print(newUser)
+        sys.exit()
 
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
         status, date = spoticore.generate_user(newUser)
+        newUser["created"]["status"] = status
+        newUser["created"]["date"] = date
 
         # Print generated user to JSON file
         utils.update_records(newUser)
