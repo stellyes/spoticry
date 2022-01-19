@@ -27,19 +27,9 @@ SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
                      "ZA", "KR", "ES", "SE", "CH", "TW", "TH", "TR",
                      "AE", "UK", "US", "UY", "VN"]
 
-# Organization ID for rengland.org mailing list
 WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
-
-# AWS Region
-REGION = 'us-west-2'
-
-# Written out for profile generation and webdriver input
-MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-# Webdriver information
 WEBDRIVER = 'src/webdriver/chromedriver.exe'
-PROXYLIST = "src/webdriver/proxy.json"
-PROXYFARM = "https://proxylist.geonode.com/api/proxy-list?limit=200&page=1&sort_by=lastChecked&sort_type=desc&speed=fast"
+REGION = 'us-west-2'
 
 
 class bcolors:
@@ -89,6 +79,14 @@ def count(path):
         makedir(path)            
 
     return nof 
+
+
+def get_sitemap():
+    # XPATH Storage Object
+    f = open('src/siteconfig.json')
+    sitemap = json.load(f)
+    f.close()
+    return sitemap
 
 
 def select_entry(filename):
@@ -253,51 +251,51 @@ def fetch_image(amount):
 
     with open("src/txt/words.txt", "r") as words:
         for i in range(amount):
-            for line in words:
-                try:
-                    case = line.strip()
+            try:
+                case = select_entry("src/txt/words.txt")
                 
-                    # Many thanks to DeepAI for this beautiful AI model, and also
-                    # making it free to use (for the most part)
-                    #
-                    # See more here: https://deepai.org/machine-learning-model/text2img
+                # Many thanks to DeepAI for this beautiful AI model, and also
+                # making it free to use (for the most part)
+                #
+                # See more here: https://deepai.org/machine-learning-model/text2img
 
-                    r = requests.post(
-                        "https://api.deepai.org/api/text2img",
-                        files={
-                            'text': case,
-                        },
-                        headers={
-                            'api-key': APIKEY
-                        }
-                    )
+                r = requests.post(
+                    "https://api.deepai.org/api/text2img",
+                    files={
+                        'text': case,
+                    },
+                    headers={
+                        'api-key': APIKEY
+                    }
+                )
 
-                    # Check if API request passed
-                    try:
-                        r.raise_for_status()
-                    except HTTPError as http_err:
-                        print(f'HTTP request failed: {http_err}')
-
-                    print("Image successfully generated using \'" + case + "\'.")
-
-                    # Generate unique, timestamped file name for image
-                    gen_filename = 'src/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
-
-                    # Parse JSON stream and write to image file
-                    url = r.json().get('output_url')
-                    image = requests.get(url, stream=True)
-                    image.raw.decode_content = True
-                    with open(gen_filename, 'wb') as i:
-                        shutil.copyfileobj(image.raw, i)
-
-                    print('Image successfully saved:\n\t >> ' + gen_filename)
+                # Check if API request passed
+                try:
+                    r.raise_for_status()
                 except HTTPError as http_err:
-                    print(f'HTTP error occured: {http_err}')
-                except Exception as err:
-                    print(f'Other error occured during image fetch: {err}')
+                    print(f'HTTP request failed: {http_err}')
+
+                print(">> Image successfully generated using \'" + case + "\'.")
+
+                # Generate unique, timestamped file name for image
+                gen_filename = 'src/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
+
+                # Parse JSON stream and write to image file
+                url = r.json().get('output_url')
+                image = requests.get(url, stream=True)
+                image.raw.decode_content = True
+                with open(gen_filename, 'wb') as i:
+                    shutil.copyfileobj(image.raw, i)
+
+                print('Image successfully saved:\n\t >> ' + gen_filename)
+            except HTTPError as http_err:
+                print(f'HTTP error occured: {http_err}')
+            except Exception as err:
+                print(f'Other error occured during image fetch: {err}')
 
             
-    words.close()          
+    words.close()
+    return gen_filename              
 
 
 def create_email(username, password):

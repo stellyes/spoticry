@@ -1,0 +1,69 @@
+{
+  "login": {
+    "webdriver": "webdriver.Chrome(executable_path=r\"src/webdriver/chromedriver.exe\", options=chrome_options)",
+    "loginEmail": "//*[@id=\"login-username\"]",
+    "loginPassword": "//*[@id=\"login-password\"]",
+    "loginButton": "//*[@id=\"login-button\"]",
+    "webplayerButton": "//*[@id=\"root\"]/div/div[2]/div/div/button[2]"
+  },
+  "homenav": {
+    "navBack": "//*[@id=\"main\"]/div/div[2]/div[1]/header/div[2]/button[1]",
+    "navForward": "//*[@id=\"main\"]/div/div[2]/div[1]/header/div[2]/button[2]",
+    "userMenu": "//*[@id=\"main\"]/div/div[2]/div[1]/header/button",
+    "userMenu_options": {
+      "userMenu_profile": "//*[@id=\"context-menu\"]/div/ul/li[2]",
+      "userMenu_logout": "//*[@id=\"context-menu\"]/div/ul/li[3]/button"
+    }
+  },
+  "usernav": {
+    "userProfile_name": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[1]/div[5]/span/button",
+    "userProfile_img": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[1]/div[4]/div/div[2]/div/button"
+  },
+  "artistnav": {
+    "playButton": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[2]/div/button[1]",
+    "followButton": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[2]/div/button[2]",
+    "popularSongs": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/div[1]/div/div/div/div/div[2]",
+    "popularReleases": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[1]/div[2]",
+    "discographyPreview": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[2]/div[2]",
+    "discographyView": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[2]/div[1]/div/a",
+    "featuringMenu": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[4]/div[2]",
+    "similarArtists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[5]/div[2]",
+    "featuringAlbums": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[6]/div[2]",
+    "artistPlaylists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[7]/div[2]",
+    "topPlaylists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[8]/div[2]"
+  },
+  "songcontrols": {
+    "playButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/button",
+    "forwaredButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[1]",
+    "backButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[2]",
+    "shuffleButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[1]",
+    "repeatButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[2]",
+    "muteButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/div[3]/button",
+    "queueButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/div[1]/div/button",
+    "fullscreenButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/button",
+    "likeButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/button[1]",
+    "currentSong": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/div[2]/div[1]/div/div/div/div",
+    "currentArtist": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/div[2]/div[3]/div/div/div/div"
+  },
+
+  "createPlaylist": "//*[@id=\"main\"]/div/div[2]/nav/div[1]/div[2]/div/div[1]/button",
+  "likedSongs": "//*[@id=\"main\"]/div/div[2]/nav/div[1]/div[2]/div/div[2]/a",
+
+  "playlistShuffle": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[1]",
+  "playlistLike": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[2]",
+  "playlistOptions": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[3]",
+
+  "playlistOptions_addToQueue": "//*[@id=\"context-menu\"]/ul/li[1]/button",
+  "playlistOptions_profileDisplay": "//*[@id=\"context-menu\"]/ul/li[3]/button",
+  "playlistOptions_deletePlaylist": "//*[@id=\"context-menu\"]/ul/li[4]/button/span",
+
+  "playlistImage": "xfQXUkj6ThzTYbfF8ilt",
+  "playlistName": "//button[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/span/button",
+  "playlistDescription": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/h2[2]/button",
+  "playlistAuthor": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/div/div",
+
+  "playliseEditImage": "/html/body/div[16]/div/div/div/div[2]/div[1]/div[2]/div/button",
+  "playlistEditName": "//button[@id=\"text-input-fe6d2b3bc5d62df0\"]",
+  "playlistEditDescription": "/html/body/div[16]/div/div/div/div[2]/div[3]/textarea",
+  "playlistEditSave": "Qt5xfSWikz6CLU8Vobxs jzic9t5dn38QUOYlDka0 Up_Ke_BKTraatSMY_Po_"
+}

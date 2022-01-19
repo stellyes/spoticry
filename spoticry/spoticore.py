@@ -1,9 +1,12 @@
+import site
 import time
+import json
 import utils
 import random
+import hashlib
 import requests
 
-from lxml import html
+from utils import bcolors
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -11,6 +14,62 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+
+
+
+
+class userinstance:
+    def __init__(self, web, user, site):
+
+        print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
+
+        # Options argument initalization
+        chrome_options = webdriver.ChromeOptions()                  
+
+        chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])  # Assigns proxy
+        # chrome_options.add_argument('--headless')                             # Specifies GUI display, set to headless (NOGUI)
+        #chrome_options.add_argument('--ignore-certificate-errors')              # Minimize console output
+        #chrome_options.add_argument('--ignore-ssl-errors')                      # Minimize console output
+        #chrome_options.add_argument('log-level=3')                              # Minimize console output
+
+        self.user = user
+        self.site = site     
+        self.web = eval(web)
+
+        self.web.get('https://accounts.spotify.com/no/login')   
+        time.sleep(5)
+
+        email = self.web.find_element(By.XPATH, site['login']['loginEmail'])
+        email.send_keys(user['email'])
+        time.sleep(random.randint(2, 8))
+
+        password = self.web.find_element(By.XPATH, site['login']['loginPassword'])
+        password.send_keys(user['pass'])
+        time.sleep(random.randint(2, 8))
+
+        login = self.web.find_element(By.XPATH, site['login']['loginButton'])
+        login.click()
+        time.sleep(random.randint(5, 10))
+
+        webplayer = self.web.find_element(By.XPATH, site['login']['webplayerButton'])
+        webplayer.click()    
+    
+        print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
+        time.sleep(random.randint(3, 8))
+
+    def newPlaylist(self):
+        create = self.web.find_element(By.XPATH, self.site['createPlaylist'])
+        create.click()
+        time.sleep(random.randint(2, 5))
+
+        rename = self.web.find_element(By.CLASS_NAME, self.site['playlistImage'])
+        result = utils.fetch_image(1)
+        rename.send_keys(result)
+        time.sleep(random.randint(3, 7))
+
+        save = self.web.find_element(By.CLASS_NAME, self.site['playlistEditSave'])
+        save.click()
+        time.sleep(random.randint(15))
 
 
 def generate_user(user):
@@ -61,53 +120,20 @@ def generate_user(user):
 
 
 def newinstance(user):
-    
+
+    # Create sitemap and trigger objects for webdriver
+    site = utils.get_sitemap()
+    trigger = site['login']['webdriver']
+
+    # Grab proxy from passed user
     proxy = user['proxy']['ip']
 
-    chrome_options = webdriver.ChromeOptions()                  # Options argument initalization
-    chrome_options.add_argument('--proxy-server=%s' % proxy)  # Assigns proxy
-    # chrome_options.add_argument('--headless')                   # Specifies GUI display, set to headless (NOGUI)
-    chrome_options.add_argument('--ignore-certificate-errors')  # Minimize console output
-    chrome_options.add_argument('--ignore-ssl-errors')          # Minimize console output
-    chrome_options.add_argument('log-level=3')                  # Minimize console output
+    # Initialization 
+    test = userinstance(trigger, user, site)
     
-    # Use Google Chrome webdriver to handle form filling      
-    web = webdriver.Chrome(executable_path=r"src/webdriver/chromedriver.exe", options=chrome_options)  
-
-    web.get('https://accounts.spotify.com/ua/login')
-    
-    time.sleep(5)
-
-    email = web.find_element(By.XPATH, '//*[@id="login-username"]')
-    email.send_keys(user['email'])
-    time.sleep(random.randint(2, 8))
-
-    password = web.find_element(By.XPATH, '//*[@id="login-password"]')
-    password.send_keys(user['pass'])
-    time.sleep(random.randint(2, 8))
-
-    login = web.find_element(By.XPATH, '//*[@id="login-button"]')
-    login.click()
-    time.sleep(random.randint(5, 10))
-
-    webplayer = web.find_element(By.XPATH, '//*[@id="root"]/div/div[2]/div/div/button[2]')
-    webplayer.click()
-
-    html_object = web.page_source
-    track_length = html_object.xpath("//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[2]/div[3]")
-
-    playButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/button'
-    forwaredButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[1]'
-    backButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[2]'
-    shuffleButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[1]'
-    repeatButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[2]'
-
-    muteButton = '//*[@id="main"]/div/div[2]/div[2]/footer/div/div[3]/div/div[3]/button'
-    
-    time.sleep(15)
-
-    
+    # Test new playlist
+    test.newPlaylist()
 
 
 if __name__ == "__main__":
-    newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '154.21.39.177:6015', 'country': 'US'}})   
+    newinstance({'email': 'spoticrier@gmail.com', 'pass': '!8192spoticry', 'proxy': {'ip': '45.192.138.248:6890', 'country': 'NO'}})   
