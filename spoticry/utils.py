@@ -52,7 +52,7 @@ class dob:
 
 def makedir(path):
     '''
-    Creates directory if proxy folder does note exist
+    Creates directory does not exist
     '''   
 
     if not os.path.exists(path):

@@ -6,48 +6,90 @@
     "loginButton": "//*[@id=\"login-button\"]",
     "webplayerButton": "//*[@id=\"root\"]/div/div[2]/div/div/button[2]"
   },
-  "homenav": {
-    "navBack": "//*[@id=\"main\"]/div/div[2]/div[1]/header/div[2]/button[1]",
-    "navForward": "//*[@id=\"main\"]/div/div[2]/div[1]/header/div[2]/button[2]",
-    "userMenu": "//*[@id=\"main\"]/div/div[2]/div[1]/header/button",
+  "contextMenu_Song": {
+    "addToQueue": "//div[@id='context-menu']/ul/li[1]",
+    "removeFromQueue": "//div[@id='context-menu']/ul/li[2]",
+    "goToSongRadio": "//div[@id='context-menu']/ul/li[3]",
+    "goToArtist": "//div[@id='context-menu']/ul/li[4]",
+    "goToAlbum": "//div[@id='context-menu']/ul/li[5]",
+    "showCredits": "//div[@id='context-menu']/ul/li[6]",
+    "likeButton": "//div[@id='context-menu']/ul/li[7]",
+    "addToPlaylist": "//div[@id='context-menu']/ul/li[8]",
+    "addToPlaylist_list": {
+      "makeSongPlaylist": "//div[@id='context-menu']/ul/li[8]/div/ul/li[1]",
+      "playlistSelect": "//div[@id='context-menu']/ul/li[8]/div/ul/li[#INDEX]"
+    },
+    "share": "//div[@id='context-menu']/ul/li[9]/div/ul/li/button"
+  },
+  "homeNav": {
+    "navBack": "//button[@data-testid='top-bar-back-button']",
+    "navForward": "//button[@data-testid='top-bar-forward-button']",
+    "userMenu": "//button[@data-testid='user-widget-link']",
     "userMenu_options": {
-      "userMenu_profile": "//*[@id=\"context-menu\"]/div/ul/li[2]",
-      "userMenu_logout": "//*[@id=\"context-menu\"]/div/ul/li[3]/button"
+      "userMenu_profile": "//button[@data-testid='user-widget-menu']/ul/li[2]",
+      "userMenu_logout": "//button[@data-testid='user-widget-menu']/ul/li[4]"
     }
   },
-  "usernav": {
-    "userProfile_name": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[1]/div[5]/span/button",
-    "userProfile_img": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[1]/div[4]/div/div[2]/div/button"
+  "sidebarNav": {
+    "homeButton": "//a[@class='link-subtle ATUzFKub89lzvkmvhpyE']",
+    "yourLibrary": "//a[@class='link-subtle ATUzFKub89lzvkmvhpyE moDRd9td0KtitPDzR7OJ']",
+    "createPlaylist": "//button[@data-testid='create-playlist-button']",
+    "likedSongs": "//a[@class='pTIS4aTGrcrLRflgLO5S']",
+    "playlists": "//ul[@data-testid='rootlist']/div[2]/li[#INDEX]/div"
+  },
+  "profileNav": {
+    "editImage": "//button[@data-testid='edit-image-button']",
+    "editName": "//button[@title='Edit details']"
   },
   "artistnav": {
-    "playButton": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[2]/div/button[1]",
-    "followButton": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[2]/div/button[2]",
-    "popularSongs": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/div[1]/div/div/div/div/div[2]",
-    "popularReleases": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[1]/div[2]",
-    "discographyPreview": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[2]/div[2]",
-    "discographyView": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[2]/div[1]/div/a",
-    "featuringMenu": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[4]/div[2]",
-    "similarArtists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[5]/div[2]",
-    "featuringAlbums": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[6]/div[2]",
-    "artistPlaylists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[7]/div[2]",
-    "topPlaylists": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[2]/div[3]/section[8]/div[2]"
+    "playButton": "//button[@data-testid='play-button']/button[1]",
+    "followButton": "//div[@data-testid='action-bar-row']/button[2]",
+    "popular": {
+      "toggleSize": "//div[@data-testid='grid-container']/div/button",
+      "song": "//div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='#INDEX']/div/div[1]/div/button"
+    },
+    "popularReleases": "//div[@class='contentSpacing']/section[@aria-label='Popular releases']/div[@data-testid='grid-container']/div[#INDEX]",
+    "albums": "//div[@class='contentSpacing']/section[@aria-label='Albums']/div[@data-testid='grid-container']/div[#INDEX]",
+    "singles_EPs": "//div[@class='contentSpacing']/section[@aria-label='Singles and EPs']/div[@data-testid='grid-container']/div[#INDEX]",
+    "featuringPlaylists": "//div[@class='contentSpacing']/section[@aria-label='Featuring $ARTIST']/div[@data-testid='grid-container']/div[#INDEX]",
+    "fansAlsoLike": "//div[@class='contentSpacing']/section[@aria-label='Fans also like']/div[@data-testid='grid-container']/div[#INDEX]",
+    "appearsOn": "//div[@class='contentSpacing']/section[@aria-label='Appears On']/div[@data-testid='grid-container']/div[#INDEX]",
+    "discoveredOn": "//div[@class='contentSpacing']/section[@aria-label='Discovered on']/div[@data-testid='grid-container']/div[#INDEX]"
   },
   "songcontrols": {
-    "playButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/button",
-    "forwaredButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[1]",
-    "backButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[2]",
-    "shuffleButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[1]/button[1]",
-    "repeatButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[2]/div/div[1]/div[2]/button[2]",
-    "muteButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/div[3]/button",
-    "queueButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/div[1]/div/button",
-    "fullscreenButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[3]/div/button",
-    "likeButton": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/button[1]",
-    "currentSong": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/div[2]/div[1]/div/div/div/div",
-    "currentArtist": "//*[@id=\"main\"]/div/div[2]/div[2]/footer/div/div[1]/div/div[2]/div[3]/div/div/div/div"
+    "playpauseButton": "//button[@data-testid='control-button-playpause']",
+    "skipForwardButton": "//button[@data-testid='control-button-skip-forward']",
+    "skipBackButton": "//button[@aria-label='Previous']",
+    "shuffleButton": "//button[@data-testid='control-button-shuffle']",
+    "repeatButton": "//button[@data-testid='control-button-repeat']",
+    "muteButton": "//button[@class='volume-bar__icon-button control-button']",
+    "queueButton": "//button[@aria-label='Queue']",
+    "queueOptions": {
+      "nowPlaying": {
+        "playPause": "//div[@aria-label='Now playing']/div/div[2]/div/div/div[1]/div/button",
+        "likeButton_F": "//div[@aria-label='Now playing']/div/div[2]/div/div/div[4]/button[@aria-checked='false']",
+        "likeButton_T": "//div[@aria-label='Now playing']/div/div[2]/div/div/div[4]/button[@aria-checked='true']",
+        "contextMenu_Song": "//div[@aria-label='Now playing']/div/div[2]/div/div/div[4]/button[@data-testid='more-button']"
+      },
+      "nextInQueue": {
+        "clearButton": "//button[@title='Clear queue']",
+        "playPause": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[1]/div/button",
+        "likeButton_F": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='false']",
+        "likeButton_T": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='true']",
+        "contextMenu_Song": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@data-testid='more-button']"
+      },
+      "nextUp": {
+        "playPause": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[1]/div/button",
+        "likeButton_F": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='false']",
+        "likeButton_T": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='true']",
+        "contextMenu_Song": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@data-testid='more-button']"
+      }
+    },
+    "likeButton_F": "//div[@data-testid='now-playing-widget']//button[@aria-checked='false']",
+    "likeButton_T": "//div[@data-testid='now-playing-widget']//button[@aria-checked='true']",
+    "currentSong": "//div[@data-testid='context-item-info-title']",
+    "currentArtist": "//div[@data-testid='context-item-info-artist']"
   },
-
-  "createPlaylist": "//*[@id=\"main\"]/div/div[2]/nav/div[1]/div[2]/div/div[1]/button",
-  "likedSongs": "//*[@id=\"main\"]/div/div[2]/nav/div[1]/div[2]/div/div[2]/a",
 
   "playlistShuffle": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[1]",
   "playlistLike": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[2]",
@@ -58,7 +100,7 @@
   "playlistOptions_deletePlaylist": "//*[@id=\"context-menu\"]/ul/li[4]/button/span",
 
   "playlistImage": "xfQXUkj6ThzTYbfF8ilt",
-  "playlistName": "//button[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/span/button",
+  "playlistName": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/span/button/span/h1",
   "playlistDescription": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/h2[2]/button",
   "playlistAuthor": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[1]/div[5]/div/div",
 
