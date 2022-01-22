@@ -63,6 +63,11 @@ def makedir(path):
                 raise
 
 
+# Returns aboslute path of file from relative path
+def absolutePath(relativePath):
+    return os.path.abspath(relativePath)
+
+
 def count(path):
     '''
     Counts files in subdirectory
@@ -278,6 +283,7 @@ def fetch_image(amount):
                 print(">> Image successfully generated using \'" + case + "\'.")
 
                 # Generate unique, timestamped file name for image
+                makedir('src/img')
                 gen_filename = 'src/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
 
                 # Parse JSON stream and write to image file

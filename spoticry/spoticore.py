@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import json
@@ -76,7 +77,7 @@ class userinstance():
         # Options argument initalization
         chrome_options = webdriver.ChromeOptions()                  
 
-        chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])  # Assigns proxy
+        # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])  # Assigns proxy
         # chrome_options.add_argument('--headless')                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_argument('--ignore-certificate-errors')              # Minimize console output
         chrome_options.add_argument('--ignore-ssl-errors')                      # Minimize console output
@@ -121,10 +122,14 @@ class userinstance():
         a.clear()
         time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))   
 
-    def newPlaylist(self, title, description, image):
+    # Return to open.spotify.com
+    def home(self):
+        self.dClick(self.site['sidebarNav']['homeButton'])    
 
-        self.dClick("//button[@data-testid='create-playlist-button']")           # "Create Playlist"
-        self.dClick("//div[@id='main']/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[5]/span/button/span/h1")     # Playlist title select
+    def createPlaylist(self, title, description, image):
+
+        self.dClick(self.site['sidebarNav']['createPlaylist'])           # "Create Playlist"
+        self.dClick(self.site['playlistNav']['playlistTitle'])     # Playlist title select
         self.dClick("(.//*[normalize-space(text()) and normalize-space(.)='Confirm My Choices'])[1]/following::div[4]")                 # Click edit title box
         
         self.dClear("//input[@data-testid='playlist-edit-details-name-input']")         # Remove default text from playlist title
@@ -141,18 +146,12 @@ class userinstance():
         a010.send_keys(image)
         time.sleep(random.randint(4, 7))
 
-        # Close file-picker dialogue 
-        webdriver.ActionChains(self.web).send_keys(Keys.ESCAPE).perform()
 
         # "Save" 
-        save = self.web.find_element(By.XPATH, "//button[@data-testid='playlist-edit-details-save-button']")
-        save.click()
-        time.sleep(random.randint(4, 7))
+        self.dClick(self.site['playlistNav']['editDetails']['save'])
 
         # Return to open.spotify.com
-        home = self.web.find_element(By.XPATH, "//div[@id='main']/div/div[2]/nav/div/ul/li/a/span"),
-        home.click()
-        time.sleep(21)
+        self.dClick(self.site['sidebarNav']['homeButton'])
 
         self.web.close()
 
@@ -211,9 +210,9 @@ def newinstance(user):
 
     # Initialization 
     test = userinstance(trigger, user, site)
-    
+
     # Test new playlist
-    test.newPlaylist("hi from selenium!","a test playlist generated with selenium", "D:\Personal Files\Autostream\spoticry\src\img\image14122021031438.jpg")
+    test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))
 
 
 if __name__ == "__main__":

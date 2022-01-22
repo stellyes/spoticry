@@ -31,7 +31,7 @@
     }
   },
   "sidebarNav": {
-    "homeButton": "//a[@class='link-subtle ATUzFKub89lzvkmvhpyE']",
+    "homeButton": "//nav[@class='Root__nav-bar']/div[1]/ul/li[1]",
     "yourLibrary": "//a[@class='link-subtle ATUzFKub89lzvkmvhpyE moDRd9td0KtitPDzR7OJ']",
     "createPlaylist": "//button[@data-testid='create-playlist-button']",
     "likedSongs": "//a[@class='pTIS4aTGrcrLRflgLO5S']",
@@ -89,6 +89,38 @@
     "likeButton_T": "//div[@data-testid='now-playing-widget']//button[@aria-checked='true']",
     "currentSong": "//div[@data-testid='context-item-info-title']",
     "currentArtist": "//div[@data-testid='context-item-info-artist']"
+  },
+  "playlistNav": {
+    "playlistPlayPause": "//button[@data-testid='play-button']",
+    "playlistLike_F": "//button[@data-testid='add-button'][@aria-checked='false']",
+    "playlistLike_T": "//button[@data-testid='add-button'][@aria-checked='true']",
+    "playlistMore": "//button[@data-testid='more-button']",
+    "playlistMore_options": {
+      "addToQueue": "//div[@id='context-menu']/ul/li[1]/button",
+      "playlistRadio": "//div[@id='context-menu']/ul/li[2]/button",
+      "removeFromProfile": "//div[@id='context-menu']/ul/li[3]/button",
+      "removeFromLibrary": "//div[@id='context-menu']/ul/li[4]/button",
+      "share": {
+        "shareButton": "//div[@id='context-menu']/ul/li[5]/button",
+        "copyURI": "//div[@id='context-menu']/ul/li[5]/div/ul/li[1]/button"
+      }
+    },
+    "tracks": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[#INDEX]",
+    "trackControls": {
+      "playPause": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[#INDEX]/div/div[1]/div/button",
+      "songTitle": "//div[@class='iCQtmPqY0QvkumAOuCjr']/div",
+      "songArtist": "//div[@class='iCQtmPqY0QvkumAOuCjr']/span"
+    },
+    "playlistTitle": "//div[@id='main']/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[5]/span/button/span/h1",
+    "playlistDescription": "//button[@class='YxJ3zwH0R8K8njVQgMcw']",
+    "playlistImage": "//button[@data-testid='edit-image-button']",
+    "editDetails": {
+      "editTitle": "//input[@data-testid='playlist-edit-details-name-input']",
+      "editDescription": "//textarea[@data-testid='playlist-edit-details-description-input']",
+      "editImage": "(.//*[normalize-space(text()) and normalize-space(.)='Edit details'])[1]/following::*[name()='svg'][3]",
+      "sendImage": "//input[@type='file']",
+      "save": "//button[@data-testid='playlist-edit-details-save-button']"
+    }
   },
 
   "playlistShuffle": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[1]",
