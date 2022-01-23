@@ -17,7 +17,7 @@
     "addToPlaylist": "//div[@id='context-menu']/ul/li[8]",
     "addToPlaylist_list": {
       "makeSongPlaylist": "//div[@id='context-menu']/ul/li[8]/div/ul/li[1]",
-      "playlistSelect": "//div[@id='context-menu']/ul/li[8]/div/ul/li[#INDEX]"
+      "playlistSelect": "//div[@id='context-menu']/ul/li[8]/div/ul/li[$INDEX]"
     },
     "share": "//div[@id='context-menu']/ul/li[9]/div/ul/li/button"
   },
@@ -32,10 +32,13 @@
   },
   "sidebarNav": {
     "homeButton": "//nav[@class='Root__nav-bar']/div[1]/ul/li[1]",
-    "yourLibrary": "//a[@class='link-subtle ATUzFKub89lzvkmvhpyE moDRd9td0KtitPDzR7OJ']",
+    "yourLibrary": "//div[@class='Root__top-container']/div[1]/nav[@class='Root__nav-bar']/div[1]/ul/li[3]/div",
+    "yourLibrary_options": {
+      "playlistSelect": "//div[@data-testid='grid-container']/div[$INDEX]"
+    },
     "createPlaylist": "//button[@data-testid='create-playlist-button']",
     "likedSongs": "//a[@class='pTIS4aTGrcrLRflgLO5S']",
-    "playlists": "//ul[@data-testid='rootlist']/div[2]/li[#INDEX]/div"
+    "playlists": "//ul[@data-testid='rootlist']/div[2]/li[$INDEX]/div"
   },
   "profileNav": {
     "editImage": "//button[@data-testid='edit-image-button']",
@@ -46,15 +49,15 @@
     "followButton": "//div[@data-testid='action-bar-row']/button[2]",
     "popular": {
       "toggleSize": "//div[@data-testid='grid-container']/div/button",
-      "song": "//div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='#INDEX']/div/div[1]/div/button"
+      "song": "//div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='$INDEX']/div/div[1]/div/button"
     },
-    "popularReleases": "//div[@class='contentSpacing']/section[@aria-label='Popular releases']/div[@data-testid='grid-container']/div[#INDEX]",
-    "albums": "//div[@class='contentSpacing']/section[@aria-label='Albums']/div[@data-testid='grid-container']/div[#INDEX]",
-    "singles_EPs": "//div[@class='contentSpacing']/section[@aria-label='Singles and EPs']/div[@data-testid='grid-container']/div[#INDEX]",
-    "featuringPlaylists": "//div[@class='contentSpacing']/section[@aria-label='Featuring $ARTIST']/div[@data-testid='grid-container']/div[#INDEX]",
-    "fansAlsoLike": "//div[@class='contentSpacing']/section[@aria-label='Fans also like']/div[@data-testid='grid-container']/div[#INDEX]",
-    "appearsOn": "//div[@class='contentSpacing']/section[@aria-label='Appears On']/div[@data-testid='grid-container']/div[#INDEX]",
-    "discoveredOn": "//div[@class='contentSpacing']/section[@aria-label='Discovered on']/div[@data-testid='grid-container']/div[#INDEX]"
+    "popularReleases": "//div[@class='contentSpacing']/section[@aria-label='Popular releases']/div[@data-testid='grid-container']/div[$INDEX]",
+    "albums": "//div[@class='contentSpacing']/section[@aria-label='Albums']/div[@data-testid='grid-container']/div[$INDEX]",
+    "singles_EPs": "//div[@class='contentSpacing']/section[@aria-label='Singles and EPs']/div[@data-testid='grid-container']/div[$INDEX]",
+    "featuringPlaylists": "//div[@class='contentSpacing']/section[@aria-label='Featuring $ARTIST']/div[@data-testid='grid-container']/div[$INDEX]",
+    "fansAlsoLike": "//div[@class='contentSpacing']/section[@aria-label='Fans also like']/div[@data-testid='grid-container']/div[$INDEX]",
+    "appearsOn": "//div[@class='contentSpacing']/section[@aria-label='Appears On']/div[@data-testid='grid-container']/div[$INDEX]",
+    "discoveredOn": "//div[@class='contentSpacing']/section[@aria-label='Discovered on']/div[@data-testid='grid-container']/div[$INDEX]"
   },
   "songcontrols": {
     "playpauseButton": "//button[@data-testid='control-button-playpause']",
@@ -73,16 +76,16 @@
       },
       "nextInQueue": {
         "clearButton": "//button[@title='Clear queue']",
-        "playPause": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[1]/div/button",
-        "likeButton_F": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='false']",
-        "likeButton_T": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='true']",
-        "contextMenu_Song": "//div[@aria-label='Next in queue']/div/div[2]/div[#INDEX]/div/div[4]/button[@data-testid='more-button']"
+        "playPause": "//div[@aria-label='Next in queue']/div/div[2]/div[$INDEX]/div/div[1]/div/button",
+        "likeButton_F": "//div[@aria-label='Next in queue']/div/div[2]/div[$INDEX]/div/div[4]/button[@aria-checked='false']",
+        "likeButton_T": "//div[@aria-label='Next in queue']/div/div[2]/div[$INDEX]/div/div[4]/button[@aria-checked='true']",
+        "contextMenu_Song": "//div[@aria-label='Next in queue']/div/div[2]/div[$INDEX]/div/div[4]/button[@data-testid='more-button']"
       },
       "nextUp": {
-        "playPause": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[1]/div/button",
-        "likeButton_F": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='false']",
-        "likeButton_T": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@aria-checked='true']",
-        "contextMenu_Song": "//div[@aria-label='Next up']/div/div[2]/div[#INDEX]/div/div[4]/button[@data-testid='more-button']"
+        "playPause": "//div[@aria-label='Next up']/div/div[2]/div[$INDEX]/div/div[1]/div/button",
+        "likeButton_F": "//div[@aria-label='Next up']/div/div[2]/div[$INDEX]/div/div[4]/button[@aria-checked='false']",
+        "likeButton_T": "//div[@aria-label='Next up']/div/div[2]/div[$INDEX]/div/div[4]/button[@aria-checked='true']",
+        "contextMenu_Song": "//div[@aria-label='Next up']/div/div[2]/div[$INDEX]/div/div[4]/button[@data-testid='more-button']"
       }
     },
     "likeButton_F": "//div[@data-testid='now-playing-widget']//button[@aria-checked='false']",
@@ -105,9 +108,9 @@
         "copyURI": "//div[@id='context-menu']/ul/li[5]/div/ul/li[1]/button"
       }
     },
-    "tracks": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[#INDEX]",
+    "tracks": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[$INDEX]",
     "trackControls": {
-      "playPause": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[#INDEX]/div/div[1]/div/button",
+      "playPause": "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/div[$INDEX]/div/div[1]/div/button",
       "songTitle": "//div[@class='iCQtmPqY0QvkumAOuCjr']/div",
       "songArtist": "//div[@class='iCQtmPqY0QvkumAOuCjr']/span"
     },

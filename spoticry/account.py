@@ -20,7 +20,7 @@ def main():
         # Generate spotifyUser data
         # Generate temp email address and email MD5 hash token
         email = utils.generate_email(domain_index)
-        print(email)
+
         # Generate random username
         username = utils.generate_username()
         # Generate random password

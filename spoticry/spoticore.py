@@ -1,8 +1,10 @@
+from asyncio import exceptions
 import os
 import sys
 import time
 import json
 import utils
+import string
 import random
 import hashlib
 import requests
@@ -77,13 +79,10 @@ class userinstance():
         # Options argument initalization
         chrome_options = webdriver.ChromeOptions()                  
 
-        # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])  # Assigns proxy
-        # chrome_options.add_argument('--headless')                             # Specifies GUI display, set to headless (NOGUI)
-        chrome_options.add_argument('--ignore-certificate-errors')              # Minimize console output
-        chrome_options.add_argument('--ignore-ssl-errors')                      # Minimize console output
-        chrome_options.add_argument('log-level=3')                              # Minimize console output
-
+        chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+        # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
 
         self.user = user
         self.site = site     
@@ -120,40 +119,70 @@ class userinstance():
     def dClear(self, xpath):
         a = self.web.find_element(By.XPATH, xpath)
         a.clear()
-        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))   
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))  
+
+    # Only random sleep functionality
+    def dSleep(self):
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))      
+
+    # Bool function to check if element exists on webpage
+    def exists(self, xpath):
+        try:
+            self.web.find_element(By.XPATH, xpath)
+        except NoSuchElementException:
+            self.dSleep()
+            return False
+        self.dSleep()    
+        return True    
+
+    # Replaces $INDEX marker in XPATH 
+    def indexString(self, xpath, index):
+        return xpath.replace("$INDEX", index)    
+
+    # Returns number of subelements
+    def countPlaylists(self, xpath):       
+        count = 0
+        cond = True
+
+        try:
+            while(cond):
+                
+                count += 1
+        except NoSuchElementException:
+            return count  
+    
+    
 
     # Return to open.spotify.com
     def home(self):
-        self.dClick(self.site['sidebarNav']['homeButton'])    
+        self.dClick(self.site['sidebarNav']['homeButton'])                
 
+    # Creates playlist from passed in credentials
     def createPlaylist(self, title, description, image):
 
         self.dClick(self.site['sidebarNav']['createPlaylist'])           # "Create Playlist"
         self.dClick(self.site['playlistNav']['playlistTitle'])     # Playlist title select
         self.dClick("(.//*[normalize-space(text()) and normalize-space(.)='Confirm My Choices'])[1]/following::div[4]")                 # Click edit title box
-        
         self.dClear("//input[@data-testid='playlist-edit-details-name-input']")         # Remove default text from playlist title
         self.dSend("//input[@data-testid='playlist-edit-details-name-input']", title)   # Edit playlist title 
-
         self.dClear("(.//*[normalize-space(text()) and normalize-space(.)='Description'])[1]/following::textarea[1]")               # Remove playlist description
         self.dSend("(.//*[normalize-space(text()) and normalize-space(.)='Description'])[1]/following::textarea[1]", description)   # Edit playlist description
+        self.dClick("(.//*[normalize-space(text()) and normalize-space(.)='Edit details'])[1]/following::*[name()='svg'][3]")       # Click edit image
+        self.dSend("//input[@type='file']", image)                      # Send image
+        self.dClick(self.site['playlistNav']['editDetails']['save'])    # "Save" 
+        self.home()
 
-        a008 = self.web.find_element(By.XPATH, "(.//*[normalize-space(text()) and normalize-space(.)='Edit details'])[1]/following::*[name()='svg'][3]")
-        a008.click()
-        time.sleep(random.randint(4, 7))
+    def selectPlaylist(self):
+        self.dClick("//span[@as='span'][text()='Your Library']")
 
-        a010 = self.web.find_element(By.XPATH, "//input[@type='file']")
-        a010.send_keys(image)
-        time.sleep(random.randint(4, 7))
+        index = str(random.randint(2 , self.countPlaylists(self.site['sidebarNav']['yourLibrary_options']['playlistSelect'])))
+        xpath = self.indexString(self.site['sidebarNav']['yourLibrary_options']['playlistSelect'], index)
+        self.dClick(xpath)
 
-
-        # "Save" 
-        self.dClick(self.site['playlistNav']['editDetails']['save'])
-
-        # Return to open.spotify.com
-        self.dClick(self.site['sidebarNav']['homeButton'])
+        time.sleep(15)
 
         self.web.close()
+
 
 def generate_user(user):
 
@@ -212,8 +241,30 @@ def newinstance(user):
     test = userinstance(trigger, user, site)
 
     # Test new playlist
-    test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))
+    # test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))
+
+    try:
+        # Get number of playlists
+        test.selectPlaylist()
+    except NoSuchElementException as E:
+        test.web.quit()
+        print(E)
+    except AttributeError as E:
+        test.web.quit()
+        print(E)    
 
 
 if __name__ == "__main__":
     newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '209.127.170.150:8243', 'country': 'US'}})     
+
+
+    """
+        driver.find_element_by_xpath("//div[@id='main']/div/div[2]/nav/div/div[2]/div/div[4]/div[4]/div/div/ul/div/div[2]/li[2]/div/a/span").click()
+        driver.find_element_by_link_text("name").click()
+        driver.find_element_by_link_text("hgs").click()
+        driver.find_element_by_xpath("//div[@id='main']/div/div[2]/nav/div/div[2]/div/div[4]/div[4]/div/div/ul/div/div[2]/li[10]/div/a/span").click()
+        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[1]/following::*[name()='svg'][3]").click()
+        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[2]/following::*[name()='svg'][1]").click()
+        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[2]/following::*[name()='svg'][2]").click()
+        driver.find_element_by_xpath("//div[@id='tippy-1607']/ul/li[2]/button/span").click()
+    """
