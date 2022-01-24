@@ -1,4 +1,5 @@
 from asyncio import exceptions
+from distutils import command
 import os
 import sys
 import time
@@ -75,7 +76,7 @@ class session():
 
 # Webdriver controller
 class userinstance():
-    def __init__(self, user, site, state):
+    def __init__(self, user, site, state, session_id, executor_url):
 
         if (state=="start"):
             print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
@@ -106,12 +107,17 @@ class userinstance():
             self.dClick(site['login']['webplayerButton']) 
 
             print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
+
         elif (state=="resume"):
-            return 3
+            print(">> " + bcolors.OKCYAN + "Resuming Webplayer instance..." + bcolors.ENDC)
+            
+            self.web = webdriver.Remote(command_executor=executor_url, desired_capabilities={})
+            self.web.session_id = session_id
+
+            print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
     
     def shutdown(self):
         print(">>\n>> Session ID: " + self.session_id + " | >> Execute URL: " + self.executor_url)
-        self.web.quit() 
 
     # Dynamic click -> wait function
     def dClick(self, xpath):
@@ -133,7 +139,13 @@ class userinstance():
 
     # Only random sleep functionality
     def dSleep(self):
-        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))      
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))   
+
+    # Returns collection of sub elements from referenced XPATH
+    def dSearch(self, xpath):
+        a = self.web.find_elements(By.XPATH, xpath)
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+        return a       
 
     # Bool function to check if element exists on webpage
     def exists(self, xpath):
@@ -143,24 +155,12 @@ class userinstance():
             self.dSleep()
             return False
         self.dSleep()    
-        return True    
+        return True      
 
-    # Replaces $INDEX marker in XPATH 
-    def indexString(self, xpath, index):
-        return xpath.replace("$INDEX", index)    
-
-    # Returns number of subelements
-    def countPlaylists(self, xpath):       
-        count = 0
-        cond = True
-
-        try:
-            while(cond):
-                test = self.indexString(xpath, str(count + 1))
-                if (self.exists(test)):
-                    count += 1
-        except NoSuchElementException:
-            return count  
+    def getPlaylists(self):
+        # Get class attribute from div[2]
+        # https://www.geeksforgeeks.org/get_attribute-element-method-selenium-python/#:~:text=get_attribute()%20element%20method%20%E2%80%93%20Selenium%20Python,-Difficulty%20Level%20%3A%20Basic&text=get_attribute%20method%20is%20used%20to,property%20with%20the%20given%20name.
+        playlists = self.dSearch
     
     # Return to open.spotify.com
     def home(self):
@@ -209,9 +209,7 @@ class userinstance():
     def selectPlaylist(self):
         self.dClick("//span[@as='span'][text()='Your Library']")
 
-        index = str(random.randint(2 , self.countPlaylists(self.site['sidebarNav']['yourLibrary_options']['playlistSelect'])))
-        xpath = self.indexString(self.site['sidebarNav']['yourLibrary_options']['playlistSelect'], index)
-        self.dClick(xpath)
+
 
     
 
@@ -283,13 +281,14 @@ def newinstance(user):
         # test.toggleShuffle()
         # test.toggleRepeat()
         # test.toggleMute()
+        test.openQueue()
     except NoSuchElementException as E:
         print(E)
     except AttributeError as E:
         print(E)    
 
 if __name__ == "__main__":
-    newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '185.245.26.63:6580', 'country': 'US'}})     
+    newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '185.245.26.63:6580', 'country': 'US'}})     
 
 
     """

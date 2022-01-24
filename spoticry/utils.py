@@ -218,8 +218,8 @@ def update_records(data):
     Updates JSON records with aggregated, generated user infomration
     '''
 
-    __dir = os.path.join('src/json')    # JSON output directory
-    __nof = 0                           # Number of files in output directory
+    __dir = os.path.join('src/resources/users/' + data['user'] + '/')      # JSON output directory
+    pldir = os.path.join(__dir + 'playlists/')                             # Create playlist directory
 
     # Creates directory if __dir does note exist
     if not os.path.exists(__dir):
@@ -228,17 +228,8 @@ def update_records(data):
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-
-    # Count number of JSON files in directory
-    for path in pathlib.Path("src/json").iterdir():
-        if path.is_file():
-            __nof += 1
-
-    # Convert file counter to str for file name
-    num = str(__nof)
-    # Account number prepended with fixed number of zeros
-    zf = num.zfill(6)
-    export = 'src/json/' + zf + '.json'    # Path to account JSON file
+    
+    export = __dir + data['user'] + '.json'    # Path to account JSON file
 
     try:
         with open(export, 'x') as x:
