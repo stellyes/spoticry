@@ -1,5 +1,6 @@
 {
   "login": {
+    "webdriver": "webdriver.Chrome(executable_path=r\"src/webdriver/chromedriver.exe\", options=chrome_options)",
     "loginEmail": "//*[@id=\"login-username\"]",
     "loginPassword": "//*[@id=\"login-password\"]",
     "loginButton": "//*[@id=\"login-button\"]",

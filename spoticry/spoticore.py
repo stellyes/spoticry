@@ -20,6 +20,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 
+START = "start"
+RESUME = "resume"
+
 
 # Data organization to be logged
 class session():
@@ -72,39 +75,43 @@ class session():
 
 # Webdriver controller
 class userinstance():
-    def __init__(self, user, site):
+    def __init__(self, user, site, state):
 
-        print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
+        if (state=="start"):
+            print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
 
-        # Webdriver service object
-        webdriverChromeService = Service('src/webdriver/chromedriver.exe')
+            # Webdriver service object
+            # webdriverChromeService = Service('src/webdriver/chromedriver.exe')
 
-        # Options argument initalization
-        chrome_options = webdriver.ChromeOptions()                  
+            # Options argument initalization
+            chrome_options = webdriver.ChromeOptions()                  
 
-        # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
-        # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
-        chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
+            chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+            # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
+            chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
+            chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
 
-        self.user = user
-        self.site = site     
-        self.web = webdriver.Chrome(service=webdriverChromeService, options=chrome_options)
-        print(self.web.session_id)
+            self.user = user
+            self.site = site     
+            self.web = eval(self.site['login']['webdriver'])
+            self.session_id = self.web.session_id
+            self.executor_url = self.web.command_executor._url
 
-        self.web.get('https://accounts.spotify.com/us/login')   
-        time.sleep(5)
+            self.web.get('https://accounts.spotify.com/us/login')   
+            time.sleep(5)
 
-        self.dSend(site['login']['loginEmail'], user['email'])
-        self.dSend(site['login']['loginPassword'], user['pass'])
-        self.dClick(site['login']['loginButton'])
-        self.dClick(site['login']['webplayerButton']) 
+            self.dSend(site['login']['loginEmail'], user['email'])
+            self.dSend(site['login']['loginPassword'], user['pass'])
+            self.dClick(site['login']['loginButton'])
+            self.dClick(site['login']['webplayerButton']) 
+
+            print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
+        elif (state=="resume"):
+            return 3
     
-        print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
-    
-    def tearDown(self):
-        self.web.quit()
-        self.assertEqual([], self.verificationErrors) 
+    def shutdown(self):
+        print(">>\n>> Session ID: " + self.session_id + " | >> Execute URL: " + self.executor_url)
+        self.web.quit() 
 
     # Dynamic click -> wait function
     def dClick(self, xpath):
@@ -262,31 +269,27 @@ def newinstance(user):
     site = utils.get_sitemap()
 
     # Initialization 
-    test = userinstance(user, site)
-
-    # Test new playlist
-    # test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))
+    test = userinstance(user, site, START)
 
     try:
-        # Get number of playlists
-        test.selectPlaylist()
-        test.playPause()
-        test.skipBack()
-        test.skipForward()
-        test.toggleShuffle()
-        test.toggleRepeat()
-        test.toggleMute()
+        '''
+        Quarantining:
+            test.selectPlaylist()
+        '''
+        # test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))     Functional
+        # test.playPause()  
+        # test.skipBack()
+        # test.skipForward()
+        # test.toggleShuffle()
+        # test.toggleRepeat()
+        # test.toggleMute()
     except NoSuchElementException as E:
-        test.web.quit()
         print(E)
     except AttributeError as E:
-        test.web.quit()
         print(E)    
 
-    test.web.quit()
-
 if __name__ == "__main__":
-    newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '209.127.170.150:8243', 'country': 'US'}})     
+    newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '185.245.26.63:6580', 'country': 'US'}})     
 
 
     """
