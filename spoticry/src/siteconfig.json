@@ -1,6 +1,5 @@
 {
   "login": {
-    "webdriver": "webdriver.Chrome(executable_path=r\"src/webdriver/chromedriver.exe\", options=chrome_options)",
     "loginEmail": "//*[@id=\"login-username\"]",
     "loginPassword": "//*[@id=\"login-password\"]",
     "loginButton": "//*[@id=\"login-button\"]",
@@ -59,8 +58,8 @@
     "appearsOn": "//div[@class='contentSpacing']/section[@aria-label='Appears On']/div[@data-testid='grid-container']/div[$INDEX]",
     "discoveredOn": "//div[@class='contentSpacing']/section[@aria-label='Discovered on']/div[@data-testid='grid-container']/div[$INDEX]"
   },
-  "songcontrols": {
-    "playpauseButton": "//button[@data-testid='control-button-playpause']",
+  "songControls": {
+    "playPauseButton": "//button[@data-testid='control-button-playpause']",
     "skipForwardButton": "//button[@data-testid='control-button-skip-forward']",
     "skipBackButton": "//button[@aria-label='Previous']",
     "shuffleButton": "//button[@data-testid='control-button-shuffle']",

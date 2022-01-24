@@ -72,22 +72,25 @@ class session():
 
 # Webdriver controller
 class userinstance():
-    def __init__(self, web, user, site, wait=None):
+    def __init__(self, user, site):
 
         print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
+
+        # Webdriver service object
+        webdriverChromeService = Service('src/webdriver/chromedriver.exe')
 
         # Options argument initalization
         chrome_options = webdriver.ChromeOptions()                  
 
-        chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+        # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
         # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
         chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
 
         self.user = user
         self.site = site     
-        self.web = eval(web)
-        self.web.implicitly_wait(30)
+        self.web = webdriver.Chrome(service=webdriverChromeService, options=chrome_options)
+        print(self.web.session_id)
 
         self.web.get('https://accounts.spotify.com/us/login')   
         time.sleep(5)
@@ -146,20 +149,44 @@ class userinstance():
 
         try:
             while(cond):
-                
-                count += 1
+                test = self.indexString(xpath, str(count + 1))
+                if (self.exists(test)):
+                    count += 1
         except NoSuchElementException:
             return count  
     
-    
-
     # Return to open.spotify.com
     def home(self):
-        self.dClick(self.site['sidebarNav']['homeButton'])                
+        self.dClick(self.site['sidebarNav']['homeButton']) 
+
+    # Toggle shuffle feature on/off
+    def toggleShuffle(self):
+        self.dClick(self.site['songControls']['shuffleButton'])  
+
+    # Toggle repeat between off/queue/song repeat
+    def toggleRepeat(self):
+        self.dClick(self.site['songControls']['repeatButton'])      
+
+    def toggleMute(self):
+        self.dClick(self.site['songControls']['muteButton'])
+
+    # Toggle play/pause master controls
+    def playPause(self):
+        self.dClick(self.site['songControls']['playPauseButton']) 
+
+    # Skip to next song in queue
+    def skipForward(self):
+        self.dClick(self.site['songControls']['skipForwardButton']) 
+
+    # Skip back to beginning of track/previous song
+    def skipBack(self):
+        self.dClick(self.site['songControls']['skipBackButton'])            
+
+    def openQueue(self):
+        self.dClick(self.site['songControls']['queueButton'])
 
     # Creates playlist from passed in credentials
     def createPlaylist(self, title, description, image):
-
         self.dClick(self.site['sidebarNav']['createPlaylist'])           # "Create Playlist"
         self.dClick(self.site['playlistNav']['playlistTitle'])     # Playlist title select
         self.dClick("(.//*[normalize-space(text()) and normalize-space(.)='Confirm My Choices'])[1]/following::div[4]")                 # Click edit title box
@@ -179,9 +206,7 @@ class userinstance():
         xpath = self.indexString(self.site['sidebarNav']['yourLibrary_options']['playlistSelect'], index)
         self.dClick(xpath)
 
-        time.sleep(15)
-
-        self.web.close()
+    
 
 
 def generate_user(user):
@@ -235,10 +260,9 @@ def newinstance(user):
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
-    trigger = site['login']['webdriver']
 
     # Initialization 
-    test = userinstance(trigger, user, site)
+    test = userinstance(user, site)
 
     # Test new playlist
     # test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))
@@ -246,6 +270,12 @@ def newinstance(user):
     try:
         # Get number of playlists
         test.selectPlaylist()
+        test.playPause()
+        test.skipBack()
+        test.skipForward()
+        test.toggleShuffle()
+        test.toggleRepeat()
+        test.toggleMute()
     except NoSuchElementException as E:
         test.web.quit()
         print(E)
@@ -253,6 +283,7 @@ def newinstance(user):
         test.web.quit()
         print(E)    
 
+    test.web.quit()
 
 if __name__ == "__main__":
     newinstance({'email': 'me@rengland.org', 'pass': '!8192Rde', 'proxy': {'ip': '209.127.170.150:8243', 'country': 'US'}})     
