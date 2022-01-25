@@ -1,4 +1,5 @@
 import sys
+import json
 import utils
 import random
 import spoticore
@@ -56,7 +57,7 @@ def main():
             "gender": gender,
             "opt_in": marketing_info,
             "proxy": proxy_info,
-            "created": {
+                "created": {
                 "status": '',
                 "date": ''
             },
@@ -65,8 +66,6 @@ def main():
                 "date": ''
             }
         }
-        print(newUser)
-        sys.exit()
 
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
@@ -75,7 +74,7 @@ def main():
         newUser["created"]["date"] = date
 
         # Print generated user to JSON file
-        utils.update_records(newUser)
+        utils.create_user(newUser)
 
         print(">> User " + newUser["user"] + " successfully generated\n")
 

@@ -1,6 +1,6 @@
 {
   "login": {
-    "webdriver": "webdriver.Chrome(executable_path=r\"src/webdriver/chromedriver.exe\", options=chrome_options)",
+    "webdriver": "webdriver.Chrome(executable_path=r\"src/resources/webdriver/chromedriver.exe\", options=chrome_options)",
     "loginEmail": "//*[@id=\"login-username\"]",
     "loginPassword": "//*[@id=\"login-password\"]",
     "loginButton": "//*[@id=\"login-button\"]",
@@ -115,7 +115,8 @@
       "songArtist": "//div[@class='iCQtmPqY0QvkumAOuCjr']/span"
     },
     "playlistTitle": "//div[@id='main']/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div/div[5]/span/button/span/h1",
-    "playlistDescription": "//button[@class='YxJ3zwH0R8K8njVQgMcw']",
+    "playlistDescription": "//section[@data-testid='playlist-page']/div[1]/div[5]/h2[2]/p",
+    "playlistAuthor": "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div/a",
     "playlistImage": "//button[@data-testid='edit-image-button']",
     "editDetails": {
       "editTitle": "//input[@data-testid='playlist-edit-details-name-input']",

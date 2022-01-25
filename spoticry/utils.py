@@ -28,7 +28,7 @@ SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
                      "AE", "UK", "US", "UY", "VN"]
 
 WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
-WEBDRIVER = 'src/webdriver/chromedriver.exe'
+WEBDRIVER = 'src/resources/webdriver/chromedriver.exe'
 REGION = 'us-west-2'
 
 
@@ -161,19 +161,19 @@ def generate_username():
             username = username + str(op0)
         elif username_order == 1:
             markers[1] = 1
-            op1 = select_entry("src/txt/fname.txt")
+            op1 = select_entry("src/resources/txt/fname.txt")
             username = username + op1
         elif username_order == 2:
             markers[2] = 1
-            op2 = select_entry("src/txt/lname.txt")
+            op2 = select_entry("src/resources/txt/lname.txt")
             username = username + op2
         elif username_order == 3:
             markers[3] = 1
-            op3 = select_entry("src/txt/words.txt")
+            op3 = select_entry("src/resources/txt/words.txt")
 
             # If length of string is unreasonably long, reselect
             while len(op3) > 8:
-                op3 = select_entry("src/txt/words.txt")
+                op3 = select_entry("src/resources/txt/words.txt")
             username = username + op3
 
     return username
@@ -205,7 +205,7 @@ def get_proxy():
     Pick random proxy server in directorty
     '''  
 
-    root = 'src/proxies/'  
+    root = 'src/resources/proxies/'  
     file = random.choice(os.listdir(root))                   
     country = root + file
     proxy = select_entry(country)
@@ -213,13 +213,12 @@ def get_proxy():
     return { "ip": proxy, "country": file.removesuffix('.txt') } 
 
 
-def update_records(data):
+def create_user(data):
     '''
     Updates JSON records with aggregated, generated user infomration
     '''
 
     __dir = os.path.join('src/resources/users/' + data['user'] + '/')      # JSON output directory
-    pldir = os.path.join(__dir + 'playlists/')                             # Create playlist directory
 
     # Creates directory if __dir does note exist
     if not os.path.exists(__dir):
@@ -237,6 +236,21 @@ def update_records(data):
     except:
         print("\n>>> ERROR\n>>> Could not create JSON file\n")  
 
+def updateJSON(data, path):
+
+    makedir(path)
+
+    # Pulling JSON object from file
+    f = open(path, "r")
+    o = json.load(f)
+    f.close()
+    
+    o.insert(data)
+
+    f = open(path, "w+")
+    json.dump(o, f)
+    f.close()
+
 
 def fetch_image(amount):
     '''
@@ -245,10 +259,10 @@ def fetch_image(amount):
 
     APIKEY = '075fc857-3a70-4fd8-a129-ba1cf2e62335'
 
-    with open("src/txt/words.txt", "r") as words:
+    with open("src/resources/txt/words.txt", "r") as words:
         for i in range(amount):
             try:
-                case = select_entry("src/txt/words.txt")
+                case = select_entry("src/resources/txt/words.txt")
                 
                 # Many thanks to DeepAI for this beautiful AI model, and also
                 # making it free to use (for the most part)
@@ -274,8 +288,8 @@ def fetch_image(amount):
                 print(">> Image successfully generated using \'" + case + "\'.")
 
                 # Generate unique, timestamped file name for image
-                makedir('src/img')
-                gen_filename = 'src/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
+                makedir('src/resources/img')
+                gen_filename = 'src/resources/img/image' + datetime.datetime.now().strftime("%d%m%Y%H%M%S") + '.jpg'
 
                 # Parse JSON stream and write to image file
                 url = r.json().get('output_url')

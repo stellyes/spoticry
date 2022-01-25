@@ -87,7 +87,7 @@ class userinstance():
             # Options argument initalization
             chrome_options = webdriver.ChromeOptions()                  
 
-            chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+            # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
             # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
             chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
             chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
@@ -157,11 +157,71 @@ class userinstance():
         self.dSleep()    
         return True      
 
+    def importPlaylists(self):
+        with open("src/spoticry__playlists.json", "r+") as jsonfile:
+            filedata = json.load(jsonfile)
+
+            with open("src/resources/txt/playlists.txt", "r") as file:
+                lines = file.readlines()
+
+                for line in lines:
+                    self.web.get(line)
+                    self.dSleep()
+
+
+                    # TRY: playlist not-authored - EXCEPT: authored playlist
+                    try:
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/h1").text   
+                    except:
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
+
+                    author = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div[1]/a").text
+                    
+                    
+
+                    if author == "ryan" or author == "olivbeea":
+                        
+
+                    url = self.web.current_url
+
+                    playlist_object = {
+                        "title": title,
+                        "url": url
+                    }
+
+                    print(playlist_object)
+
+                    filedata['playlists'].append(playlist_object)
+                    file.seek(0)
+                
+                json.dump(filedata, jsonfile, indent=4)
+    
     def getPlaylists(self):
         # Get class attribute from div[2]
         # https://www.geeksforgeeks.org/get_attribute-element-method-selenium-python/#:~:text=get_attribute()%20element%20method%20%E2%80%93%20Selenium%20Python,-Difficulty%20Level%20%3A%20Basic&text=get_attribute%20method%20is%20used%20to,property%20with%20the%20given%20name.
-        playlists = self.dSearch
-    
+        playlists = self.dSearch("//ul[@data-testid='rootlist']/div/div[2]")
+
+        for item in playlists:
+            # Get single child element
+            playlist = item.find_element(By.XPATH, "//div[@data-testid='rootlist-item']")
+            playlist.click()
+            self.dSleep()
+
+            # Parse out data
+            title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div/div[1]/div[5]/span/h1").text   
+            description = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/h2[2]/p").text   
+            author_uri = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div/a").get_attribute('href')
+            author = "open.spotify.com" + author_uri
+            url = self.web.current_url()
+
+            playlist_object = {
+                "title": title,
+                "description": description,
+                "author": author,
+                "url": url
+            }
+
+            utils.create_playlist(playlist_object)
     # Return to open.spotify.com
     def home(self):
         self.dClick(self.site['sidebarNav']['homeButton']) 
@@ -174,6 +234,7 @@ class userinstance():
     def toggleRepeat(self):
         self.dClick(self.site['songControls']['repeatButton'])      
 
+    # Toggle mute button
     def toggleMute(self):
         self.dClick(self.site['songControls']['muteButton'])
 
@@ -267,21 +328,35 @@ def newinstance(user):
     site = utils.get_sitemap()
 
     # Initialization 
-    test = userinstance(user, site, START)
+    test = userinstance(user, site, START, None, None)
 
     try:
         '''
         Quarantining:
             test.selectPlaylist()
         '''
-        # test.newPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))     Functional
+
+        # Song Controller (bottom panel) 
+        #
         # test.playPause()  
         # test.skipBack()
         # test.skipForward()
         # test.toggleShuffle()
         # test.toggleRepeat()
         # test.toggleMute()
-        test.openQueue()
+        # test.openQueue()
+
+        # Sidebar Controller
+        #
+        # test.createPlaylist("hi from selenium!","a test playlist generated with selenium", utils.absolutePath(utils.fetch_image(1)))     Functional
+        #test.home()
+        #test.search()
+        #test.library()
+        #test.likedSongs()
+        #test.getPlaylists()
+        test.importPlaylists()
+
+
     except NoSuchElementException as E:
         print(E)
     except AttributeError as E:
@@ -289,15 +364,3 @@ def newinstance(user):
 
 if __name__ == "__main__":
     newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '185.245.26.63:6580', 'country': 'US'}})     
-
-
-    """
-        driver.find_element_by_xpath("//div[@id='main']/div/div[2]/nav/div/div[2]/div/div[4]/div[4]/div/div/ul/div/div[2]/li[2]/div/a/span").click()
-        driver.find_element_by_link_text("name").click()
-        driver.find_element_by_link_text("hgs").click()
-        driver.find_element_by_xpath("//div[@id='main']/div/div[2]/nav/div/div[2]/div/div[4]/div[4]/div/div/ul/div/div[2]/li[10]/div/a/span").click()
-        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[1]/following::*[name()='svg'][3]").click()
-        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[2]/following::*[name()='svg'][1]").click()
-        driver.find_element_by_xpath("(.//*[normalize-space(text()) and normalize-space(.)='Feb 16, 2021'])[2]/following::*[name()='svg'][2]").click()
-        driver.find_element_by_xpath("//div[@id='tippy-1607']/ul/li[2]/button/span").click()
-    """
