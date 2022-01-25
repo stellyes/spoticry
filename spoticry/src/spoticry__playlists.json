@@ -1,1 +1,97 @@
-{}
+{
+  "playlists": []
+}
+{
+    "playlists": [
+        {
+            "title": "breakbeat/idm",
+            "url": "https://open.spotify.com/playlist/11HwkLWKaxexBgvi8vfbVa",
+            "author": "Will",
+            "priority": 1
+        },
+        {
+            "title": "songs of the people",
+            "url": "https://open.spotify.com/playlist/3uX2ZFdh5V19R1jjk6gLBd",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "lofi house masterlist",
+            "url": "https://open.spotify.com/playlist/7dTgFLBoM0s08Lr3a9IB0V",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "improv piano",
+            "url": "https://open.spotify.com/playlist/0K8th7NMB0Dqk7WpZfC23s",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "homeostasis \ud83d\udc1d",
+            "url": "https://open.spotify.com/playlist/0zZKFp7bP0GUGAFV397hOI",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "ryan's picks",
+            "url": "https://open.spotify.com/playlist/0nTWn3DztJIg6GHOijkPkI",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "18PM \ud83c\udf31\ud83c\udf32\ud83d\udda4",
+            "url": "https://open.spotify.com/playlist/6jFRh9nZRmRVQ60xmBDLqb",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "nature",
+            "url": "https://open.spotify.com/playlist/6sUkQxtPTg9mSCOqmDQ7HF",
+            "author": ":'(",
+            "priority": 1
+        },
+        {
+            "title": "Wild Ambience",
+            "url": "https://open.spotify.com/playlist/37i9dQZF1DXbpYC8go5XtU",
+            "author": "Spotify",
+            "priority": 1
+        },
+        {
+            "title": "Ambient Essentials",
+            "url": "https://open.spotify.com/playlist/37i9dQZF1DWUrPBdYfoJvz",
+            "author": "Spotify",
+            "priority": 1
+        },
+        {
+            "title": "",
+            "url": "https://open.spotify.com/playlist/5vzoBx2M9nRvohv9bLeYv4",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "",
+            "url": "https://open.spotify.com/playlist/19licACrpWKgDc207lazb1",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "equilibrium",
+            "url": "https://open.spotify.com/playlist/58eDotmRWeJKFozu5x68o8",
+            "author": "ryan",
+            "priority": 5
+        },
+        {
+            "title": "Sirius Xm hits one",
+            "url": "https://open.spotify.com/playlist/0PUxekhRsTX1cDax65IIl2",
+            "author": "olivbeea",
+            "priority": 5
+        },
+        {
+            "title": "the perfect girl",
+            "url": "https://open.spotify.com/playlist/6KHuHsHTyD3CnhCTrAYVU1",
+            "author": "lea",
+            "priority": 1
+        }
+    ]
+}

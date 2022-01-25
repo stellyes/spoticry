@@ -175,23 +175,28 @@ class userinstance():
                     except:
                         title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
 
+                    self.dSleep()    
+
                     author = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div[1]/a").text
+                    self.dSleep()
                     
-                    
+                    pr = 1
 
                     if author == "ryan" or author == "olivbeea":
-                        
+                        pr = 5
 
                     url = self.web.current_url
 
                     playlist_object = {
                         "title": title,
-                        "url": url
+                        "url": url,
+                        "author": author,
+                        "priority": pr
                     }
 
                     print(playlist_object)
 
-                    filedata['playlists'].append(playlist_object)
+                    filedata["playlists"].append(playlist_object)
                     file.seek(0)
                 
                 json.dump(filedata, jsonfile, indent=4)
@@ -363,4 +368,4 @@ def newinstance(user):
         print(E)    
 
 if __name__ == "__main__":
-    newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '185.245.26.63:6580', 'country': 'US'}})     
+    newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '209.127.170.191:8284', 'country': 'US'}})     
