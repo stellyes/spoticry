@@ -1,3 +1,172 @@
 {
-  "albums": []
+  "albums": [
+    {
+      "title": "18PM!, Vol. 2",
+      "url": "https://open.spotify.com/album/32WANab7PfrwMRCGR0b9wI",
+      "artist": "18pm",
+      "priority": 5
+    },
+    {
+      "title": "18PM!",
+      "url": "https://open.spotify.com/album/4D5eexKSnHGSUAQIMhBPdn",
+      "artist": "18pm",
+      "priority": 5
+    },
+    {
+      "title": "KICK IT TO THE RIGHT SIDE",
+      "url": "https://open.spotify.com/album/4Gp6RQdrsW0AUtQpFxDWxF",
+      "artist": "BADTIME!",
+      "priority": 5
+    },
+    {
+      "title": "Ether",
+      "url": "https://open.spotify.com/album/79dOItYSIbHwx59fsP3nIu",
+      "artist": "Cathedral Bells",
+      "priority": 2
+    },
+    {
+      "title": "Velvet Spirit",
+      "url": "https://open.spotify.com/album/5BXJPYAsjsJYx6eBzfn5c5",
+      "artist": "Cathedral Bells",
+      "priority": 2
+    },
+    {
+      "title": "Call For Help",
+      "url": "https://open.spotify.com/album/2T0LDUVshmydIaKywFCDKX",
+      "artist": "Pearly Drops",
+      "priority": 2
+    },
+    {
+      "title": "Blu",
+      "url": "https://open.spotify.com/album/0xdzo5pk6bjiURrM2Hofmt",
+      "artist": "Frex",
+      "priority": 2
+    },
+    {
+      "title": "A Is For Alpine",
+      "url": "https://open.spotify.com/album/3ap04q3OeoyOHMs2WJytN4",
+      "artist": "Alpine",
+      "priority": 2
+    },
+    {
+      "title": "Yuck",
+      "url": "https://open.spotify.com/album/3jkrsglyaPs1XDPjp9XYa6",
+      "artist": "Alpine",
+      "priority": 2
+    },
+    {
+      "title": "Clash the Truth",
+      "url": "https://open.spotify.com/album/4qC8mysA680i7chkL3JQQw",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "Somersault",
+      "url": "https://open.spotify.com/album/2d7uieZPQtrUi5AQXwdsYV",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "The Other Side of Life: Piano Ballads",
+      "url": "https://open.spotify.com/album/0Oiav6TR00OCsX68RgWojJ",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "Clash the Truth: Demos",
+      "url": "https://open.spotify.com/album/1vEqHA7TUAltNFwTSdhF9a",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "What a Pleasure",
+      "url": "https://open.spotify.com/album/4BfZ2aZSNDlXFx15lgHGcO",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "Beach Fossils",
+      "url": "https://open.spotify.com/album/0G6lKfbUwl6eijdyJgStxL",
+      "artist": "Beach Fossils",
+      "priority": 2
+    },
+    {
+      "title": "Nocturne",
+      "url": "https://open.spotify.com/album/139JTQqbke2UEFCKgmy34d",
+      "artist": "Wild Nothing",
+      "priority": 2
+    },
+    {
+      "title": "Gemini",
+      "url": "https://open.spotify.com/album/3hxVFxpF7uUtjLHzvGIm7W",
+      "artist": "Wild Nothing",
+      "priority": 2
+    },
+    {
+      "title": "Slide",
+      "url": "https://open.spotify.com/album/12Biup1Sq5hpHsX85gJPb2",
+      "artist": "George Clanton",
+      "priority": 2
+    },
+    {
+      "title": "George Clanton and Nick Hexum",
+      "url": "https://open.spotify.com/album/714XLbWXbM8C6sfaYALRG7",
+      "artist": "",
+      "priority": 2
+    },
+    {
+      "title": "pensif",
+      "url": "https://open.spotify.com/album/0qgKUzsv5AWTU5ewAeUc4a",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "atmos/requiem",
+      "url": "https://open.spotify.com/album/3ryrE1Ev5NX5b8HlPEEiAj",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "ego adsum",
+      "url": "https://open.spotify.com/album/0up8IIz6OWHcIRXPBBnWDt",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "maneo/timor",
+      "url": "https://open.spotify.com/album/0XgEAmGwxCtk2ainSg3nNj",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "potentia per christange",
+      "url": "https://open.spotify.com/album/0wtRTG9RVy0Xh1BJ2ihEp8",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "sollemnis",
+      "url": "https://open.spotify.com/album/0Jki1880Ehh6wlJ8uPHuRl",
+      "artist": "deo autem nihil",
+      "priority": 5
+    },
+    {
+      "title": "control",
+      "url": "https://open.spotify.com/album/1lACYQEr8VeVsWyTBGwZxx",
+      "artist": "18pm",
+      "priority": 5
+    },
+    {
+      "title": "invisible",
+      "url": "https://open.spotify.com/album/3HysglFq3rPcOQ7sJjCZd5",
+      "artist": "18pm",
+      "priority": 5
+    },
+    {
+      "title": "homeschool",
+      "url": "https://open.spotify.com/album/6oA8658nWYLvLeCxuoKuWG",
+      "artist": "18pm",
+      "priority": 5
+    }
+  ]
 }
