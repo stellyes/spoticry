@@ -1,5 +1,6 @@
 from asyncio import exceptions
 from distutils import command
+from email.mime import base
 import os
 import sys
 import time
@@ -23,6 +24,11 @@ from selenium.common.exceptions import NoAlertPresentException
 
 START = "start"
 RESUME = "resume"
+
+BL_AUTHORS = ['Spotify']
+
+AUTHORS = ['ryan', 'olivbeea']
+ARTISTS = ['deo autem nihil', '18pm', '18PM', 'Exploitsound', 'exploitsound', 'BADTIME!', 'Ｏｃｅａｎ Ｓｈｏｒｅｓ']
 
 
 # Data organization to be logged
@@ -87,8 +93,9 @@ class userinstance():
             # Options argument initalization
             chrome_options = webdriver.ChromeOptions()                  
 
-            # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+            chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
             # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
+            chrome_options.add_argument("--mute-audio")                                             # Mute audio output
             chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
             chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
 
@@ -157,32 +164,111 @@ class userinstance():
         self.dSleep()    
         return True      
 
-    def importPlaylists(self):
-        with open("src/spoticry__playlists.json", "r+") as jsonfile:
+    def songScrape(self, opcode):
+        '''
+
+        '''    
+        if opcode == 0:
+            print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from playlist..." + bcolors.ENDC)
+            baseXPATH = "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/"
+            i = 2
+            
+            while (i >= 2):
+                try:
+                    itemXPATH0 = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[2]/div"
+                    
+                    titleXPATH = itemXPATH0 + "/div"
+                    title = self.web.find_element(By.XPATH, titleXPATH).text
+
+                    artistXPATH = itemXPATH0 + "/span/a"
+                    artist = self.web.find_element(By.XPATH, artistXPATH).text
+
+                    albumXPATH = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[3]/a"
+                    album = self.web.find_element(By.XPATH, )
+        elif opcode == 1:
+    
+
+    def importAlbums(self):
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Importing playlists..." + bcolors.ENDC)
+        with open("src/spoticry__albums.json", "r+") as jsonfile:
+            # Create object from file contents
             filedata = json.load(jsonfile)
 
-            with open("src/resources/txt/playlists.txt", "r") as file:
+            with open("src/resources/txt/albums.txt", "r+") as file:
+                # Get lines containing playlist URLs
                 lines = file.readlines()
 
                 for line in lines:
+                    # Get playlist URL
                     self.web.get(line)
                     self.dSleep()
 
-
-                    # TRY: playlist not-authored - EXCEPT: authored playlist
-                    try:
-                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/h1").text   
-                    except:
-                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
-
+                    title = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
                     self.dSleep()    
 
+                    # Get author of playlist
+                    artist = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a").text
+                    self.dSleep()
+                    
+                    # Default priority scale
+                    pr = 2
+
+                    if artist in ARTISTS:
+                        pr = 5
+
+                    url = self.web.current_url
+
+                    playlist_object = {
+                        "title": title,
+                        "url": url,
+                        "artist": artist,
+                        "priority": pr
+                    }
+
+                    print(">>\t" + bcolors.OKGREEN + "Album \'" + title + "\' imported" + bcolors.ENDC)
+
+                    if playlist_object not in filedata["playlists"]:
+                        filedata.append(playlist_object)
+                        file.seek(0)
+                        print
+                    else:
+                        print(">>\t" + bcolors.WARNING + "Album \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
+                
+                jsonfile.truncate(0)
+                file.truncate(0)
+                json.dump(filedata, jsonfile, indent=4)
+
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Playlists imported" + bcolors.ENDC)
+
+    def importPlaylists(self):
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Importing playlists..." + bcolors.ENDC)
+        with open("src/spoticry__playlists.json", "r+") as jsonfile:
+            # Create object from file contents
+            filedata = json.load(jsonfile)
+
+            with open("src/resources/txt/playlists.txt", "r+") as file:
+                # Get lines containing playlist URLs
+                lines = file.readlines()
+
+                for line in lines:
+                    # Get playlist URL
+                    self.web.get(line)
+                    self.dSleep()
+
+                    try: # If playlist not authored by profile
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/h1").text   
+                    except: # If playlist is authored by profile
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
+                    self.dSleep()    
+
+                    # Get author of playlist
                     author = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div[1]/a").text
                     self.dSleep()
                     
-                    pr = 1
+                    # Default priority scale
+                    pr = 2
 
-                    if author == "ryan" or author == "olivbeea":
+                    if author in AUTHORS:
                         pr = 5
 
                     url = self.web.current_url
@@ -193,40 +279,21 @@ class userinstance():
                         "author": author,
                         "priority": pr
                     }
+                    print(">>\t" + bcolors.OKGREEN + "Playlist \'" + title + "\' imported" + bcolors.ENDC)
 
-                    print(playlist_object)
-
-                    filedata["playlists"].append(playlist_object)
-                    file.seek(0)
+                    if playlist_object not in filedata["playlists"]:
+                        filedata["playlists"].append(playlist_object)
+                        file.seek(0)
+                        print
+                    else:
+                        print(">>\t" + bcolors.WARNING + "Playlist \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
                 
+                jsonfile.truncate(0)
+                file.truncate(0)
                 json.dump(filedata, jsonfile, indent=4)
-    
-    def getPlaylists(self):
-        # Get class attribute from div[2]
-        # https://www.geeksforgeeks.org/get_attribute-element-method-selenium-python/#:~:text=get_attribute()%20element%20method%20%E2%80%93%20Selenium%20Python,-Difficulty%20Level%20%3A%20Basic&text=get_attribute%20method%20is%20used%20to,property%20with%20the%20given%20name.
-        playlists = self.dSearch("//ul[@data-testid='rootlist']/div/div[2]")
 
-        for item in playlists:
-            # Get single child element
-            playlist = item.find_element(By.XPATH, "//div[@data-testid='rootlist-item']")
-            playlist.click()
-            self.dSleep()
-
-            # Parse out data
-            title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div/div[1]/div[5]/span/h1").text   
-            description = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/h2[2]/p").text   
-            author_uri = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div/a").get_attribute('href')
-            author = "open.spotify.com" + author_uri
-            url = self.web.current_url()
-
-            playlist_object = {
-                "title": title,
-                "description": description,
-                "author": author,
-                "url": url
-            }
-
-            utils.create_playlist(playlist_object)
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Playlists imported" + bcolors.ENDC)
+   
     # Return to open.spotify.com
     def home(self):
         self.dClick(self.site['sidebarNav']['homeButton']) 
@@ -255,8 +322,14 @@ class userinstance():
     def skipBack(self):
         self.dClick(self.site['songControls']['skipBackButton'])            
 
+    # Opens queue view
     def openQueue(self):
         self.dClick(self.site['songControls']['queueButton'])
+
+    # Opens playlist specified through url
+    def openPlaylist(self, url):
+        self.web.get(url)
+        self.dSleep()
 
     # Creates playlist from passed in credentials
     def createPlaylist(self, title, description, image):
@@ -270,14 +343,88 @@ class userinstance():
         self.dClick("(.//*[normalize-space(text()) and normalize-space(.)='Edit details'])[1]/following::*[name()='svg'][3]")       # Click edit image
         self.dSend("//input[@type='file']", image)                      # Send image
         self.dClick(self.site['playlistNav']['editDetails']['save'])    # "Save" 
+
+        with open("src/spoticry__playlists.json", "r+") as jsonfile:
+            filedata = json.load(jsonfile)
+            url = self.web.current_url
+
+            playlist_object = {
+                "title": title,
+                "url": url,
+                "author": self.user['user'],
+                "priority": 3
+            }
+
+            filedata["playlists"].append(playlist_object)
+            file.seek(0)
+
         self.home()
 
+    # Toggles play/pause for playlists
+    def playPausePlaylist(self):
+        self.dClick(self.site['playlistNav']['playlistPlayPause'])
+
+    # Option 0 - Unlike Playlist
+    # Option 1 - Like Playlist
+    def toggleLikePlaylist(self, option):
+        if (self.exists(self.site['playlistNav']['playlistLike_F']) and option == 1):
+            self.dClick(self.site['playlistNav']['playlistLike_F'])
+        elif (self.exists(self.site['playlistNav']['playlistLike_T']) and option == 0):
+            self.dClick(self.site['playlistNav']['playlistLike_T'])    
+        else:
+            print(">> \t" + bcolors.WARNING + "Unable to perform operation under toggleLikePlaylist()" + bcolors.ENDC)    
+
+    # Selects random playlist
     def selectPlaylist(self):
-        self.dClick("//span[@as='span'][text()='Your Library']")
+        with open('src/spoticry__playlists.json', 'r') as file:
+            data = json.load(file)
+            playlists = data['playlists']
 
+            pr = utils.selectPriority()
+            if pr < 5:  # Temporary scale adjustor
+                pr = 1
 
+            results = []
+
+            for playlist in playlists:
+                if pr == playlist['priority']:
+                    results.append(playlist)    
+
+            index = random.randint(0, len(results)-1)
 
     
+
+            return results[index]
+
+    # Searches for playlist based on one of the input parameters
+    def searchPlaylist(self, title, author, priority):
+        if title is not None:
+            with open('src/spoticry__playlists.json', 'r') as file:
+                data = json.load(file)
+                playlists = data['playlists']
+
+                for playlist in playlists:
+                    if title in playlist['title']:
+                        return playlist
+        elif author is not None:
+            with open('src/spoticry__playlists.json', 'r') as file:
+                data = json.load(file)
+                playlists = data['playlists']
+
+                for playlist in playlists:
+                    if author in playlist['author']:
+                        return playlist  
+        elif priority is not None:
+            with open('src/spoticry__playlists.json', 'r') as file:
+                data = json.load(file)
+                playlists = data['playlists']
+
+                results = []
+
+                for playlist in playlists:
+                    if priority == playlist['priority']:
+                        results.append(playlist)
+                    return results             
 
 
 def generate_user(user):
@@ -361,11 +508,11 @@ def newinstance(user):
         #test.getPlaylists()
         test.importPlaylists()
 
-
+        # Test loop
     except NoSuchElementException as E:
         print(E)
     except AttributeError as E:
         print(E)    
 
 if __name__ == "__main__":
-    newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '209.127.170.191:8284', 'country': 'US'}})     
+    newinstance({'email': 'me@rengland.org', 'user': 'spoticry', 'pass': '!8192Rde', 'proxy': {'ip': '45.57.226.203:9633', 'country': 'US'}})     

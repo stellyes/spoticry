@@ -67,6 +67,9 @@ def makedir(path):
 def absolutePath(relativePath):
     return os.path.abspath(relativePath)
 
+# Returns random timedelta for automating loops
+def randomTimeDelta(minutes_low, minutes_high):
+    return time.time() + (60 * random.randint(minutes_low, minutes_high))
 
 def count(path):
     '''
@@ -92,6 +95,25 @@ def get_sitemap():
     sitemap = json.load(f)
     f.close()
     return sitemap
+
+
+def selectPriority():
+    '''
+    Uses weighted priority scale to determine which object of priority/5 gets chosen
+    '''
+
+    scale = random.randint(0, 99)
+
+    if scale > 59:      # 40%
+        return 5
+    elif scale > 34:    # 25%
+        return 4
+    elif scale > 14:    # 20%
+        return 3 
+    elif scale > 4:     # 10%
+        return 2
+    else:               # 5%
+        return 1           
 
 
 def select_entry(filename):
@@ -314,17 +336,12 @@ def create_email(username, password):
     # Initialize AWS WorkMail Client
     client = boto3.client('workmail', region_name=REGION)
 
-    try:
-        # Create new email user
-        print(client.create_user(
-            OrganizationId = WEBMAIL_ORG_ID, 
-            Name = username,
-            DisplayName = username,
-            Password = password
-        ))
+    # Create new email user
+    print(client.create_user(
+        OrganizationId = WEBMAIL_ORG_ID, 
+        Name = username,
+        DisplayName = username,
+        Password = password
+    ))
 
-        return True
-    except:
-
-        print(">> " + bcolors.FAIL + "FATAL ERROR: Failed to initialize email for user " + username + ". Shutting down..." + bcolors.ENDC)   
-        return False
+    
