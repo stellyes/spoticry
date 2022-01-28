@@ -1,4 +1,9 @@
 {
+  "signup": {
+    "link": {
+      "us": "https://www.spotify.com/us/signup"
+    }
+  },
   "login": {
     "webdriver": "webdriver.Chrome(executable_path=r\"src/resources/webdriver/chromedriver.exe\", options=chrome_options)",
     "loginEmail": "//*[@id=\"login-username\"]",
@@ -94,10 +99,10 @@
     "currentArtist": "//div[@data-testid='context-item-info-artist']"
   },
   "playlistNav": {
-    "playlistPlayPause": "//button[@data-testid='play-button']",
-    "playlistLike_F": "//button[@data-testid='add-button'][@aria-checked='false']",
-    "playlistLike_T": "//button[@data-testid='add-button'][@aria-checked='true']",
-    "playlistMore": "//button[@data-testid='more-button']",
+    "playlistPlayPause": "//section[@data-testid='playlist-page']/div[2]/div[2]/div[@data-testid='action-bar-row']/button[@data-testid='play-button']",
+    "playlistLike_F": "//section[@data-testid='playlist-page']/div[2]/div[2]/div[@data-testid='action-bar-row']/button[@data-testid='add-button'][@aria-checked='false']",
+    "playlistLike_T": "//section[@data-testid='playlist-page']/div[2]/div[2]/div[@data-testid='action-bar-row']/button[@data-testid='add-button'][@aria-checked='true']",
+    "playlistMore": "//section[@data-testid='playlist-page']/div[2]/div[2]/div[@data-testid='action-bar-row']/button[@data-testid='more-button']",
     "playlistMore_options": {
       "addToQueue": "//div[@id='context-menu']/ul/li[1]/button",
       "playlistRadio": "//div[@id='context-menu']/ul/li[2]/button",

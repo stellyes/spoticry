@@ -5,6 +5,7 @@ import json
 import utils
 import string
 import random
+import shutil
 import pickle
 import hashlib
 import requests
@@ -20,10 +21,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 
+
 START = "start"
 RESUME = "resume"
 
 BL_AUTHORS = ['Spotify']
+BL_ARTISTS = ['Drake']
+
+ACC_ACTIVE = 'src/resources/users/active'
+ACC_INACTIVE = 'src/resources/users/inactive'
+ACC_QUARANTINE = 'src/resources/users/quarantine'
 
 AUTHORS = ['ryan', 'olivbeea']
 ARTISTS = ['deo autem nihil', '18pm', '18PM', 'Exploitsound', 'exploitsound', 'BADTIME!', 'Ｏｃｅａｎ Ｓｈｏｒｅｓ']
@@ -80,15 +87,20 @@ class session():
 
 # Webdriver controller
 class userinstance():
-    def __init__(self, user, site, state, session_id, executor_url):
+    def __init__(self, user, site, state):
         # Options argument initalization
-        chrome_options = webdriver.ChromeOptions()                  
+        chrome_options = webdriver.ChromeOptions()                
 
         chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
         # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_argument("--mute-audio")                                             # Mute audio output
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_argument("disable-infobars")
         chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging        
+
 
         if (state=="start"):
             print(">> " + bcolors.OKCYAN + "Initializing Webplayer instance..." + bcolors.ENDC)
@@ -96,22 +108,37 @@ class userinstance():
             # Webdriver service object
             # webdriverChromeService = Service('src/webdriver/chromedriver.exe')
 
+            # Assign user data and evaluate webdriver command via sitemap
             self.user = user
             self.site = site     
             self.web = eval(self.site['login']['webdriver'])
-            self.session_id = self.web.session_id
-            self.executor_url = self.web.command_executor._url
 
-            self.web.get('https://accounts.spotify.com/ca/login')   
+            # Builds corresponding URL to proxy host location
+            url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
+
+            # Open Spotify login URL
+            self.web.get(url)   
             self.dSleep()
-
+            
+            # Input login credentials
             self.dSend(site['login']['loginEmail'], user['email'])
             self.dSend(site['login']['loginPassword'], user['pass'])
             self.dClick(site['login']['loginButton'])
+
+            self.dSleep()
+
+            # Handles login errors
+            if self.exists("//div[@data-testid='login-container']/div[@role='alert']"):
+                errormessage = self.web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text
+                print(">>\t" + bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + bcolors.ENDC)
+                raise Exception("\n>>\n>> END SESSION")
+
+            # Click Webplayer option
             self.dClick(site['login']['webplayerButton']) 
 
             print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
 
+            # Attempt to gather cookies
             try:
                 pickle.dump(self.web.get_cookies(), open("src/resources/cookies/test.pk1", "wb"))
             except:
@@ -123,8 +150,6 @@ class userinstance():
             self.user = user
             self.site = site     
             self.web = eval(self.site['login']['webdriver'])
-            self.session_id = self.web.session_id
-            self.executor_url = self.web.command_executor._url
 
             self.web.get('https://accounts.spotify.com/us/login')   
             self.dSleep()
@@ -133,17 +158,20 @@ class userinstance():
                 cookies = pickle.load(open("src/resources/cookies/test.pk1", "rb"))
 
                 for cookie in cookies:
-                    self.web.add_cookie(cookie)
+                    self.web.add_cookies(cookie)
             except:
                 print(">> " + bcolors.WARNING + "Failed to gather cookies..." + bcolors.ENDC)
             self.dSleep()
 
             self.web.refresh()
+            self.dSleep()
 
             print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
+
     
     def shutdown(self):
         print(">>\n>> Session ID: " + self.session_id + " | >> Execute URL: " + self.executor_url)
+
 
     # Dynamic click -> wait function
     def dClick(self, xpath):
@@ -183,7 +211,6 @@ class userinstance():
         self.dSleep()    
         return True      
 
-
     def songScrape(self, opcode):
         '''
         OP-CODE:
@@ -193,6 +220,7 @@ class userinstance():
         if opcode == 0:
             with open('src/spoticry__songs.json', 'r+') as file:
                 filedata = json.load(file)
+
                 print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from playlist..." + bcolors.ENDC)
                 baseXPATH = "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/"
                 i = 2
@@ -203,15 +231,18 @@ class userinstance():
                         
                         titleXPATH = itemXPATH0 + "/div"
                         title = self.web.find_element(By.XPATH, titleXPATH).text
+                        print(">>\t\tSong: " + title)
 
                         artistXPATH = itemXPATH0 + "/span/a"
                         artist = self.web.find_element(By.XPATH, artistXPATH).text
+                        print(">>\t\tArtist: " + artist)
 
                         albumXPATH = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[3]/a"
                         album = self.web.find_element(By.XPATH, albumXPATH).text
 
                         href = self.web.find_element(By.XPATH, albumXPATH).get_attribute('href')
                         url = "https://open.spotify.com" + href
+                        print(">>\t\tURL: " + url)
 
                         if artist in ARTISTS:
                             pr = 5
@@ -228,9 +259,9 @@ class userinstance():
 
                         if obj not in filedata['songs']:
                             filedata['songs'].append(obj)
-                            print(">>\t " + bcolors.OKGREEN + "Song: \'" + title + "\'" + bcolors.ENDC)
+                            print(">>\t " + bcolors.OKGREEN + "Song: \'" + title + "\' successfully imported" + bcolors.ENDC)
                         else:
-                            print(">>\t" + bcolors.WARNING + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
+                            print(">>\t" + bcolors.FAIL + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
                         
                         i += 1
                     except:
@@ -242,72 +273,76 @@ class userinstance():
 
         elif opcode == 1:
             return 0
-    
 
     def importAlbums(self):
         print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Importing albums..." + bcolors.ENDC)
-        with open("src/spoticry__albums.json", "r+") as jsonfile:
-            # Create object from file contents
-            filedata = json.load(jsonfile)
+        
+        # Removes outdated version 
+        if os.path.exists("src/spoticry__albums.json"):
+            with open("src/spoticry__albums.json", "r+") as jsonfile:
+                # Create object from file contents
+                filedata = json.load(jsonfile)
+                jsonfile.close()
 
-            with open("src/resources/txt/albums.txt", "r+") as file:
-                # Get lines containing album URLs
-                lines = file.readlines()
+        with open("src/resources/txt/albums.txt", "r+") as file:
+            # Get lines containing album URLs
+            lines = file.readlines()
 
-                for line in lines:
-                    # Get album URL
-                    self.web.get(line)
+            for line in lines:
+                # Get album URL
+                self.web.get(line)
+                self.dSleep()
+
+                title = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
+                self.dSleep()    
+
+                # Get artist of album, except multiple artists
+                try:
+                    artist = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a").text
                     self.dSleep()
+                except:
+                    i = 1
+                    artist = ""
+                    while i != 0:
+                        try:
+                            xpath = "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a[" + str(i) + "]"
+                            artists = self.web.find_element(By.XPATH, xpath).text
+                            artist = artist + artists + ", "
+                        except:
+                            i = 0
+                            artist.removesuffix(", ")    
+                        
+                # Default priority scale
+                pr = 2
 
-                    title = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
-                    self.dSleep()    
+                if artist in ARTISTS:
+                    pr = 5
 
-                    # Get artist of album, except multiple artists
-                    try:
-                        artist = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a").text
-                        self.dSleep()
-                    except:
-                        i = 1
-                        artist = ""
-                        while i != 0:
-                            try:
-                                xpath = "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a[" + str(i) + "]"
-                                artists = self.web.find_element(By.XPATH, xpath).text
-                                artist = artist + artists + ", "
-                            except:
-                                i = 0
-                                artist.removesuffix(", ")    
-                            
-                    # Default priority scale
-                    pr = 2
-
-                    if artist in ARTISTS:
-                        pr = 5
-
-                    url = self.web.current_url
-                    
-
-                    album_object = {
-                        "title": title,
-                        "url": url,
-                        "artist": artist,
-                        "priority": pr
-                    }
-
-                    print(">>\t" + bcolors.OKGREEN + "Album \'" + title + "\' imported" + bcolors.ENDC)
-
-                    if album_object not in filedata['albums']:
-                        filedata['albums'].append(album_object)
-                        file.seek(0)
-                    else:
-                        print(">>\t" + bcolors.WARNING + "Album \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
-
-                    # Prevent temporary IP Ban
-                    time.sleep(30)    
+                url = self.web.current_url
                 
-                jsonfile.truncate(0)
-                file.truncate(0)
-                json.dump(filedata, jsonfile, indent=4)
+
+                album_object = {
+                    "title": title,
+                    "url": url,
+                    "artist": artist,
+                    "priority": pr
+                }
+
+                print(">>\t" + bcolors.OKGREEN + "Album \'" + title + "\' imported" + bcolors.ENDC)
+
+                if album_object not in filedata['playlists'][str(pr)]:
+                    filedata['playlists'][str(pr)].append(album_object)
+                else:
+                    print(">>\t" + bcolors.WARNING + "Album \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
+
+                # Prevent temporary IP Ban
+                time.sleep(30)    
+
+        file.truncate(0)
+        os.remove("src/spoticry__albums.json")
+        
+        with open("src/spoticry__albums.json", "x") as jsonfile:
+            json.dumps(filedata, jsonfile, indent=4)
 
         print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Albums imported" + bcolors.ENDC)
 
@@ -477,7 +512,7 @@ class userinstance():
                 playlists = data['playlists']
 
                 for playlist in playlists:
-                    if title in playlist['title']:
+                    if title == playlist['title']:
                         return playlist
         elif author is not None:
             with open('src/spoticry__playlists.json', 'r') as file:
@@ -485,7 +520,7 @@ class userinstance():
                 playlists = data['playlists']
 
                 for playlist in playlists:
-                    if author in playlist['author']:
+                    if author == playlist['author']:
                         return playlist  
         elif priority is not None:
             with open('src/spoticry__playlists.json', 'r') as file:
@@ -500,60 +535,32 @@ class userinstance():
                     return results             
 
 
-def generate_user(user):
+def openUser():
 
-    gender = user['gender']
+    try:
+        filename = utils.select_file('src/resources/users/inactive')
+        movedir = filename.replace("inactive", "active")    
+        shutil.move(filename, movedir)        
 
-    if gender == 0:
-        parsed_gender = "male"
-    elif gender == 1:
-        parsed_gender = "female"
-    elif gender == 2:
-        parsed_gender = "non-binary"
-        
-    headers={"Accept-Encoding": "gzip",
-             "Accept-Language": "en-US",
-             "App-Platform": "Android",
-             "Connection": "Keep-Alive",
-             "Content-Type": "application/x-www-form-urlencoded",
-             "Host": "spclient.wg.spotify.com",
-             "User-Agent": "Spotify/8.6.72 Android/29 (SM-N976N)",
-             "Spotify-App-Version": "8.6.72",
-             "X-Client-Id": utils.generate_random_string(32)}
-    
-    payload = {"creation_point": "client_mobile",
-            "gender": parsed_gender,
-            "birth_year": user['dob']['year'],
-            "displayname": user['user'],
-            "iagree": "true",
-            "birth_month": user['dob']['month'],
-            "password_repeat": user['pass'],
-            "password": user['pass'],
-            "key": "142b583129b2df829de3656f9eb484e6",
-            "platform": "Android-ARM",
-            "email": user['email'],
-            "birth_day": user['dob']['day']}
-    
-    r = requests.post('https://spclient.wg.spotify.com/signup/public/v1/account/', headers=headers, data=payload)
+        with open(movedir, "r+") as file:
+            user = json.load(file)
 
-    if r.status_code==200:
-        if r.json()['status']==1:
-            return (True, time.time())
-        else:
-            #Details available in r.json()["errors"]
-            print(r.json()["errors"])
-            return (False, "Could not create the account, some errors occurred")
-    else:
-        return (False, "Could not load the page. Response code: "+ str(r.status_code))             
+        return user    
+    except Exception as E:
+        print(E)
+        sys.exit()
 
 
 def newinstance(user):
+
+    # Debug grab random user
+    user = openUser()
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
 
     # Initialization 
-    test = userinstance(user, site, START, None, None)
+    test = userinstance(user, site, START)
 
     try:
         '''
@@ -579,19 +586,35 @@ def newinstance(user):
         # test.library()
         # test.likedSongs()
         # test.getPlaylists()
-        # test.importPlaylists()
-        test.importAlbums()
+        test.importPlaylists()
+        # test.importAlbums()
+
+        raise Exception(">>\n>> DEBUG SESSION")
+
+        test.home()
 
         # Test loop
+        loginTime = utils.randomTimeDelta(180, 300)
+
+        while time.time() < loginTime:
+            taskTime = utils.randomTimeDelta(3, 5)
+            playlist = test.selectPlaylist()
+            while time.time() < taskTime:
+                test.openPlaylist(playlist['url'])
+                test.playPausePlaylist()
+                time.sleep(taskTime - time.time() + 1)
+
+        test.web.quit()
+
     except NoSuchElementException as E:
         print(E)
-        print(">>\n>> Session ID: " + test.session_id + "\n>> Executor URL: " + test.executor_url)
     except AttributeError as E:
         print(E)    
-        print(">>\n>> Session ID: " + test.session_id + "\n>> Executor URL: " + test.executor_url)
     except json.JSONDecodeError as E:
         print(E)    
-        print(">>\n>> Session ID: " + test.session_id + "\n>> Executor URL: " + test.executor_url)    
+    except Exception as E:
+        test.web.quit()
+        print(E)        
 
 if __name__ == "__main__":
-    newinstance({'email': 'spoticrier@gmail.com', 'user': 'spoticrier', 'pass': '#8192Rde', 'proxy': {'ip': '45.72.55.65:7102', 'country': 'CA'}})     
+    newinstance(None)   

@@ -71,6 +71,19 @@ def absolutePath(relativePath):
 def randomTimeDelta(minutes_low, minutes_high):
     return time.time() + (60 * random.randint(minutes_low, minutes_high))
 
+def updateJSON(file, data):
+    try:
+        if os.path.exists(file):
+            os.remove(file)
+
+        with open(file, 'x') as filename:
+            json.dumps(data, filename, indent=4)    
+        return True
+    except:
+        print(">>\t" + bcolors.FAIL + "ERROR: Unable to update JSON file" + bcolors.ENDC)
+        return False
+
+
 def count(path):
     '''
     Counts files in subdirectory
@@ -127,6 +140,17 @@ def select_entry(filename):
     doc.close()
     return random.choice(words)
 
+def select_file(filepath):
+    '''
+    Function: Selects random file from given folder path
+    Returns: String - Absolute path to selected file
+    '''    
+    try:
+        return os.path.join(os.getcwd(), (filepath + "/" + random.choice(os.listdir(filepath))).replace("/", chr(92)))
+    except:
+        print(">> " + bcolors.FAIL + "ERROR: File selection failed. Shutting down..." + bcolors.ENDC)
+        sys.exit()    
+
 
 def generate_random_string(length): 
     '''
@@ -150,7 +174,7 @@ def generate_password(length):
     Random password generator of length provided
     '''
 
-    charset = string.ascii_letters + string.digits + string.punctuation
+    charset = string.ascii_letters + string.digits + '!#@&^*()<>?'
     password = ''.join(random.choice(charset) for i in range(length))
     return password
 
@@ -227,20 +251,20 @@ def get_proxy():
     Pick random proxy server in directorty
     '''  
 
-    root = 'src/resources/proxies/'  
-    file = random.choice(os.listdir(root))                   
-    country = root + file
-    proxy = select_entry(country)
+    root = 'src/resources/proxies/US.txt'  
+    #file = random.choice(os.listdir(root))                   
+    #country = root + file
+    proxy = select_entry(root)
 
-    return { "ip": proxy, "country": file.removesuffix('.txt') } 
+    return { "ip": proxy, "country": "US" } # file.removesuffix('.txt')
 
 
 def create_user(data):
     '''
-    Updates JSON records with aggregated, generated user infomration
+    Updates JSON records with aggregated, generated user information
     '''
 
-    __dir = os.path.join('src/resources/users/' + data['user'] + '/')      # JSON output directory
+    __dir = os.path.join('src/resources/users/inactive/')      # JSON output directory
 
     # Creates directory if __dir does note exist
     if not os.path.exists(__dir):
@@ -257,21 +281,6 @@ def create_user(data):
             json.dump(data, x, indent=4)
     except:
         print("\n>>> ERROR\n>>> Could not create JSON file\n")  
-
-def updateJSON(data, path):
-
-    makedir(path)
-
-    # Pulling JSON object from file
-    f = open(path, "r")
-    o = json.load(f)
-    f.close()
-    
-    o.insert(data)
-
-    f = open(path, "w+")
-    json.dump(o, f)
-    f.close()
 
 
 def fetch_image(amount):
@@ -331,17 +340,47 @@ def fetch_image(amount):
     return gen_filename              
 
 
-def create_email(username, password):
+def create_email(username, password, email):
 
     # Initialize AWS WorkMail Client
     client = boto3.client('workmail', region_name=REGION)
 
     # Create new email user
-    print(client.create_user(
+    response = client.create_user(
         OrganizationId = WEBMAIL_ORG_ID, 
         Name = username,
         DisplayName = username,
         Password = password
-    ))
+    )
+
+    # Wait to prevent server overload
+    time.sleep(random.randint(2, 5))
+
+    # Check status of AWS WorkMail response
+    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        print(">>\t User " + username + " created")
+        entity = response['UserId']
+    else:
+        print(">>\t " + bcolors.FAIL + "ERROR: User creation failed. Exiting..." + bcolors.ENDC)
+        sys.exit()
+
+    # Enable user email on AWS WorkMail
+    response = client.register_to_work_mail(
+        OrganizationId = WEBMAIL_ORG_ID,
+        EntityId = entity,
+        Email = email
+    )   
+
+    # Wait to prevent server overload
+    time.sleep(random.randint(2, 5))
+
+    # Check status of AWS WorkMail response
+    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        print(">>\t Email " + email + " for user " + username + " enabled in AWS WorkMail")
+    else:
+        print(">>\t " + bcolors.FAIL + "ERROR: Email enabling failed. Exiting..." + bcolors.ENDC)
+        sys.exit()
+
+    return     
 
     
