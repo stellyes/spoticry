@@ -130,6 +130,10 @@ class userinstance():
             # Handles login errors
             if self.exists("//div[@data-testid='login-container']/div[@role='alert']"):
                 errormessage = self.web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text
+                try:
+                    quarantineUser("src/resources/users/active/" + user['user'] + ".json")
+                except:
+                     print(">>\t" + bcolors.FAIL + "ERROR: Unable to quarantine user" + user['user'] + bcolors.ENDC)   
                 print(">>\t" + bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + bcolors.ENDC)
                 raise Exception("\n>>\n>> END SESSION")
 
@@ -168,10 +172,9 @@ class userinstance():
 
             print(">> \t" + bcolors.OKCYAN + "Complete" + bcolors.ENDC)
 
-    
+    # Handles closing of webdriver instance
     def shutdown(self):
         print(">>\n>> Session ID: " + self.session_id + " | >> Execute URL: " + self.executor_url)
-
 
     # Dynamic click -> wait function
     def dClick(self, xpath):
@@ -218,58 +221,69 @@ class userinstance():
             1 - Scrape songs from album
         '''    
         if opcode == 0:
-            with open('src/spoticry__songs.json', 'r+') as file:
-                filedata = json.load(file)
+            print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from playlist..." + bcolors.ENDC)
+            baseXPATH = "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/"
+            i = 2
+            
+            while (i >= 2):
+                try:
+                    itemXPATH0 = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[2]/div"
+                    
+                    titleXPATH = itemXPATH0 + "/div"
+                    title = self.web.find_element(By.XPATH, titleXPATH).text
+                    print(">>\t\tSong: " + title)
 
-                print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from playlist..." + bcolors.ENDC)
-                baseXPATH = "//div[@data-testid='playlist-tracklist']/div[2]/div[2]/"
-                i = 2
-                
-                while (i >= 2):
+                    j = 1
+                    artists = []
                     try:
-                        itemXPATH0 = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[2]/div"
-                        
-                        titleXPATH = itemXPATH0 + "/div"
-                        title = self.web.find_element(By.XPATH, titleXPATH).text
-                        print(">>\t\tSong: " + title)
-
-                        artistXPATH = itemXPATH0 + "/span/a"
+                        artistXPATH = itemXPATH0 + "/span/a[" + str(j) + "]"
                         artist = self.web.find_element(By.XPATH, artistXPATH).text
-                        print(">>\t\tArtist: " + artist)
+                        artists.append[artist]
+                    except:
+                        artist_string = ""
+                        for artist in artists:
+                            artist_string = artist_string + artist + ", "
+                        artist_string.removesuffix(", ")       
 
-                        albumXPATH = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[3]/a"
-                        album = self.web.find_element(By.XPATH, albumXPATH).text
+                    albumXPATH = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[3]/a"
+                    album = self.web.find_element(By.XPATH, albumXPATH).text
 
-                        href = self.web.find_element(By.XPATH, albumXPATH).get_attribute('href')
-                        url = "https://open.spotify.com" + href
-                        print(">>\t\tURL: " + url)
+                    url = self.web.find_element(By.XPATH, albumXPATH).get_attribute('href')
+                    print(">>\t\tURL: " + url)
 
+                    for artist in artists:
                         if artist in ARTISTS:
                             pr = 5
+                            break
                         else:
                             pr = random.randint(1, 2)    
 
-                        obj = {
-                            "title": title,
-                            "artist": artist,
-                            "album": album,
-                            "album-url": url,
-                            "priority": pr
-                        }   
+                    song_obj = {
+                        "title": title,
+                        "artist": artist,
+                        "album": album,
+                        "album-url": url,
+                        "priority": pr
+                    }   
 
-                        if obj not in filedata['songs']:
-                            filedata['songs'].append(obj)
-                            print(">>\t " + bcolors.OKGREEN + "Song: \'" + title + "\' successfully imported" + bcolors.ENDC)
-                        else:
-                            print(">>\t" + bcolors.FAIL + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
-                        
-                        i += 1
-                    except:
-                        i = 1 
-                file.truncate(0)
-                json.dump(filedata, file, indent=4)
-                
-                print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)
+                    song_object_directory = "src/resources/songs/" + str(pr)
+                    obj_name = title + ".json"
+
+                    if (obj_name not in os.listdir(song_object_directory)) or (not os.path.exists(song_object_directory)):
+                        utils.makedir(song_object_directory)
+                        jsonfile = os.path.join(song_object_directory + obj_name)
+                        with open(jsonfile, 'x')as obj:
+                            json.dumps(song_obj, obj, indent=4)
+
+                        print(">>\t" + bcolors.OKGREEN + "Playlist \'" + title + "\' imported" + bcolors.ENDC)
+                    else:
+                        print(">>\t" + bcolors.FAIL + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
+                    
+                    i += 1
+                except:
+                    i = 1 
+            
+            print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)
 
         elif opcode == 1:
             return 0
@@ -349,58 +363,57 @@ class userinstance():
     # Imports list of playlists in storage file.
     def importPlaylists(self):
         print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Importing playlists..." + bcolors.ENDC)
-        with open("src/spoticry__playlists.json", "w+") as jsonfile:
-            # Create object from file contents
-            filedata = json.load(jsonfile)
 
-            with open("src/resources/txt/playlists.txt", "w+") as file:
-                # Get lines containing playlist URLs
-                lines = file.readlines()
+        with open("src/resources/txt/playlists.txt", "r+") as file:
+            # Get lines containing playlist URLs
+            lines = file.readlines()
 
-                for line in lines:
-                    try:
-                        # Get playlist URL
-                        self.web.get(line)
-                        self.dSleep()
+            for line in lines:
+                try:
+                    # Get playlist URL
+                    self.web.get(line)
+                    self.dSleep()
 
-                        try: # If playlist not authored by profile
-                            title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/h1").text   
-                        except: # If playlist is authored by profile
-                            title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
-                        self.dSleep()    
+                    try: # If playlist not authored by profile
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/h1").text   
+                    except: # If playlist is authored by profile
+                        title = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/span/button/span/h1").text
+                    self.dSleep()    
 
-                        # Get author of playlist
-                        author = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div[1]/a").text
-                        self.dSleep()
-                        
-                        # Default priority scale
-                        pr = 2
+                    # Get author of playlist
+                    author = self.web.find_element(By.XPATH, "//section[@data-testid='playlist-page']/div[1]/div[5]/div/div[1]/a").text
+                    self.dSleep()
+                    
+                    # Default priority scale
+                    pr = random.randint(1, 2)
 
-                        if author in AUTHORS:
-                            pr = 5
+                    if author in AUTHORS:
+                        pr = 5
 
-                        url = self.web.current_url
-                        songs = self.songScrape(0)
+                    url = self.web.current_url
+                    songs = self.songScrape(0)
 
-                        playlist_object = {
-                            "title": title,
-                            "url": url,
-                            "author": author,
-                            "priority": pr
-                        }
+                    playlist_object = {
+                        "title": title,
+                        "url": url,
+                        "author": author,
+                        "priority": pr
+                    }
+                    
+                    playlist_object_directory = os.path.join("src/resources/playlists/" + str(pr) + "/")
+                    obj_name = title + ".json"
+
+                    if obj_name not in os.listdir(playlist_object_directory):
+                        jsonfile = os.path.join(playlist_object_directory + obj_name)
+                        with open(jsonfile, 'x')as obj:
+                            json.dumps(playlist_object, obj, indent=4)
+
                         print(">>\t" + bcolors.OKGREEN + "Playlist \'" + title + "\' imported" + bcolors.ENDC)
-
-                        if playlist_object not in filedata['playlists']:
-                            filedata['playlists'].append(playlist_object)
-                            file.seek(0)
-                            print
-                        else:
-                            print(">>\t" + bcolors.WARNING + "Playlist \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
-                    except:
-                        print(">> " + bcolors.FAIL + "WARNING: Error parsing playlists.txt list, clearing text file and resuming..." + bcolors.ENDC)
-                jsonfile.truncate(0)
-                file.truncate(0)
-                json.dump(filedata, jsonfile, indent=4)
+                    else:
+                        print(">>\t" + bcolors.WARNING + "Playlist \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
+                except:
+                    print(">> " + bcolors.FAIL + "WARNING: Error parsing playlists.txt list, clearing text file and resuming..." + bcolors.ENDC)
+            file.truncate(0)
 
         print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Playlists imported" + bcolors.ENDC)
    
@@ -536,7 +549,6 @@ class userinstance():
 
 
 def openUser():
-
     try:
         filename = utils.select_file('src/resources/users/inactive')
         movedir = filename.replace("inactive", "active")    
@@ -550,11 +562,35 @@ def openUser():
         print(E)
         sys.exit()
 
+def quarantineUser(userpath):       
+    try:
+        filename = utils.select_file(userpath)
+        movedir = filename.replace("active", "quarantine")    
+        shutil.move(filename, movedir)        
+
+        with open(movedir, "r+") as file:
+            user = json.load(file)
+
+        return user    
+    except Exception as E:
+        print(E)
+        sys.exit()         
 
 def newinstance(user):
 
+    record = utils.startProcess()
+
     # Debug grab random user
-    user = openUser()
+    # user = openUser()
+    user = {
+        "email": "me@rengland.org",
+        "user": "spoticry",
+        "pass": "!8192Rde",
+        "proxy": {
+            "ip": "45.72.53.148:6184",
+            "country": "US"
+        }
+    }
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
@@ -567,6 +603,8 @@ def newinstance(user):
         Quarantining:
             test.selectPlaylist()
         '''
+
+        
 
         # Song Controller (bottom panel) 
         #
@@ -588,6 +626,8 @@ def newinstance(user):
         # test.getPlaylists()
         test.importPlaylists()
         # test.importAlbums()
+    
+        
 
         raise Exception(">>\n>> DEBUG SESSION")
 
@@ -615,6 +655,8 @@ def newinstance(user):
     except Exception as E:
         test.web.quit()
         print(E)        
+
+    print(utils.peakMemory(record))
 
 if __name__ == "__main__":
     newinstance(None)   

@@ -1,0 +1,24 @@
+{
+    "email": "RedstoneMarlina@rengland.org",
+    "user": "ToneshiaSimonton",
+    "pass": "Ti3FA8y9",
+    "dob": {
+        "day": 19,
+        "month": 4,
+        "year": 2001
+    },
+    "gender": 2,
+    "opt_in": 0,
+    "proxy": {
+        "ip": "23.254.18.47:7619",
+        "country": "US"
+    },
+    "created": {
+        "status": true,
+        "date": 1643370655.034244
+    },
+    "verified": {
+        "status": "",
+        "date": ""
+    }
+}

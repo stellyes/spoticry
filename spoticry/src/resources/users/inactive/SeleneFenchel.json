@@ -1,0 +1,24 @@
+{
+    "email": "Boone22@rengland.org",
+    "user": "SeleneFenchel",
+    "pass": "Cl24x85F*RG",
+    "dob": {
+        "day": 25,
+        "month": 6,
+        "year": 1983
+    },
+    "gender": 1,
+    "opt_in": 0,
+    "proxy": {
+        "ip": "138.128.38.237:6304",
+        "country": "US"
+    },
+    "created": {
+        "status": true,
+        "date": 1643370549.6298957
+    },
+    "verified": {
+        "status": "",
+        "date": ""
+    }
+}

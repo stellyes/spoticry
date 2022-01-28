@@ -59,11 +59,18 @@ def request(user):
 
 
 def main():
-    amount = input("\n>> Spoticry Account Tool v0.0.2\n>> How many accounts do you wish to create? : ")
-    amount = int(amount)
+    valid = False
+
+    while not valid:
+        try:
+            amount = input(">>\n>> Spoticry Account Tool v0.0.2\n>> How many accounts do you wish to create? : ")
+            amount = int(amount)
+            valid = True
+        except ValueError as VE:
+            print(">> " + utils.bcolors.WARNING + "WARNING: Error converting input. Please provide a valid input" + utils.bcolors.ENDC)    
 
     for i in range(amount):
-        print("\n>> Generating new user...")
+        print(">>\n>> Generating new user...")
 
         # Random elements initialized
         password_length = random.randint(8, 16)
@@ -130,8 +137,9 @@ def main():
         time.sleep(30)
         utils.create_user(newUser)
 
-        print(">> User " + newUser["user"] + " successfully generated\n")
-        
+        print(">> " + utils.bcolors.BOLD + "User " + newUser["user"] + " successfully generated" + utils.bcolors.ENDC)
+    
+    print(">>\n>> " + utils.bcolors.OKGREEN + utils.bcolors.BOLD + str(amount) + " users successfully generated. Closing..." + utils.bcolors.ENDC + "\n")
 
 
 if __name__ == "__main__":

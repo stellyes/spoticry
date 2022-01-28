@@ -1,0 +1,24 @@
+{
+    "email": "JeneenBalleza@rengland.org",
+    "user": "20Lorien",
+    "pass": "SWnDoVw>#r*HlsCP",
+    "dob": {
+        "day": 8,
+        "month": 6,
+        "year": 1996
+    },
+    "gender": 1,
+    "opt_in": 0,
+    "proxy": {
+        "ip": "104.144.233.174:9209",
+        "country": "US"
+    },
+    "created": {
+        "status": true,
+        "date": 1643370291.5458186
+    },
+    "verified": {
+        "status": "",
+        "date": ""
+    }
+}

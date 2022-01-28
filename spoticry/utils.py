@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import json
+import math
 import errno
 import boto3
 import socket
@@ -9,6 +10,7 @@ import string
 import random
 import urllib
 import shutil
+import psutil
 import pathlib
 import requests
 import datetime
@@ -84,6 +86,19 @@ def updateJSON(file, data):
         return False
 
 
+def startProcess(): 
+    return psutil.Process()
+
+
+def peakMemory(process):
+    size_bytes = process.memory_info().peak_wset
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    result = "PEAK MEMORY USAGE: %s %s" % (s, size_name[i])
+    print(">> " + bcolors.BOLD + bcolors.OKBLUE + result + bcolors.ENDC) 
+
 def count(path):
     '''
     Counts files in subdirectory
@@ -146,10 +161,9 @@ def select_file(filepath):
     Returns: String - Absolute path to selected file
     '''    
     try:
-        return os.path.join(os.getcwd(), (filepath + "/" + random.choice(os.listdir(filepath))).replace("/", chr(92)))
+        return absolutePath(filepath)
     except:
-        print(">> " + bcolors.FAIL + "ERROR: File selection failed. Shutting down..." + bcolors.ENDC)
-        sys.exit()    
+        raise Exception(">> " + bcolors.FAIL + "ERROR: File selection failed. Shutting down..." + bcolors.ENDC)   
 
 
 def generate_random_string(length): 
