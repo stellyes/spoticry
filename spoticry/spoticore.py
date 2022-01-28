@@ -251,12 +251,12 @@ class userinstance():
                     url = self.web.find_element(By.XPATH, albumXPATH).get_attribute('href')
                     print(">>\t\tURL: " + url)
 
+                    pr = random.randint(1, 2) 
+
                     for artist in artists:
                         if artist in ARTISTS:
                             pr = 5
-                            break
-                        else:
-                            pr = random.randint(1, 2)    
+                            break                               
 
                     song_obj = {
                         "title": title,
@@ -280,7 +280,8 @@ class userinstance():
                         print(">>\t" + bcolors.FAIL + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
                     
                     i += 1
-                except:
+                except Exception as E:
+                    print(E)
                     i = 1 
             
             print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)
@@ -657,6 +658,6 @@ def newinstance(user):
         print(E)        
 
     print(utils.peakMemory(record))
-
+    test.web.quit()
 if __name__ == "__main__":
     newinstance(None)   
