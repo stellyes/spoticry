@@ -266,7 +266,7 @@ class userinstance():
                         "priority": pr
                     }   
 
-                    song_object_directory = "src/resources/songs/" + str(pr)
+                    song_object_directory = "src/resources/songs/" + str(pr) + "/"
                     obj_name = title + ".json"
 
                     if (obj_name not in os.listdir(song_object_directory)) or (not os.path.exists(song_object_directory)):
