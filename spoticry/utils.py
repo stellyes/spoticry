@@ -33,6 +33,8 @@ WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
 WEBDRIVER = 'src/resources/webdriver/chromedriver.exe'
 REGION = 'us-west-2'
 
+BL_CHAR = ["/", chr(92),  '"', '.', '<', '>', ':', '?', '*']
+RP_CHAR = ["-", '+', '\'', '_', '_lb_', "_rb_", '_col_', '_q_', '_star_']
 
 class bcolors:
     HEADER = '\033[95m'
@@ -84,6 +86,14 @@ def updateJSON(file, data):
     except:
         print(">>\t" + bcolors.FAIL + "ERROR: Unable to update JSON file" + bcolors.ENDC)
         return False
+
+
+def cleanInput(name):
+    i = 0
+    for character in BL_CHAR:
+        name = name.replace(BL_CHAR[i], RP_CHAR[i])
+        i += 1
+    return name    
 
 
 def startProcess(): 
