@@ -19,3 +19,7 @@ Along with the protection of the ghost accounts, Spoticry will automate the pres
 ### International range
 
 If I could launch this on multiple AWS EC2 regions... I'm literally sobbing that would be insane.
+
+## Documentation:
+
+to be documented need a quick reference to all the functions
