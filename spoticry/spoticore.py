@@ -158,11 +158,14 @@ class userinstance():
 
             print(">> " + bcolors.OKCYAN + "Webplayer succesfully initialized" + bcolors.ENDC)
             time.sleep(1)
+            print(">> ")
 
             # Attempt to gather cookies
             try:
                 print(">> " + bcolors.OKCYAN + "Attempting to gather cookies from browser session..." + bcolors.ENDC)
-                pickle.dump(self.web.get_cookies(), open("src/resources/cookies/test.pk1", "wb"))
+                utils.makedir("src/resources/cookies/")
+                cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
+                pickle.dump(self.web.get_cookies(), open(cookie_dir, "wb"))
                 print(">> " + bcolors.OKCYAN + "Cookies successfully stored." + bcolors.ENDC)
             except:
                 print(">> " + bcolors.WARNING + "Failed to gather cookies..." + bcolors.ENDC)    
