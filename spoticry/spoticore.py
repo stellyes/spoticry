@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import json
+from sympy import use
 import utils
 import string
 import random
@@ -9,6 +10,8 @@ import shutil
 import pickle
 import hashlib
 import requests
+
+from fake_useragent import UserAgent
 
 from utils import bcolors
 from selenium import webdriver
@@ -34,6 +37,11 @@ ACC_QUARANTINE = 'src/resources/users/quarantine'
 
 AUTHORS = ['ryan', 'olivbeea']
 ARTISTS = ['deo autem nihil', '18pm', '18PM', 'Exploitsound', 'exploitsound', 'BADTIME!', 'Ｏｃｅａｎ Ｓｈｏｒｅｓ']
+
+PLAYLIST = "playlist"
+ALBUM = "album"
+ARTIST = "artist"
+SONG = "song"
 
 
 class Error(Exception):
@@ -104,11 +112,15 @@ class session():
 class userinstance():
     def __init__(self, user, site, state):
         # Options argument initalization
-        chrome_options = webdriver.ChromeOptions()                
+        chrome_options = webdriver.ChromeOptions()     
+        ua = UserAgent()
+        userAgent = ua.random   
+        print(userAgent)        
 
         # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
         # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_argument("--mute-audio")                                             # Mute audio output
+        #chrome_options.add_argument(f'user-agent={userAgent}')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         chrome_options.add_experimental_option('useAutomationExtension', False)
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -160,19 +172,21 @@ class userinstance():
             time.sleep(1)
             print(">> ")
 
-            # Attempt to gather cookies
-            try:
-                print(">> " + bcolors.OKCYAN + "Attempting to gather cookies from browser session..." + bcolors.ENDC)
-                utils.makedir("src/resources/cookies/")
-                cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
-                pickle.dump(self.web.get_cookies(), open(cookie_dir, "wb"))
-                print(">> " + bcolors.OKCYAN + "Cookies successfully stored." + bcolors.ENDC)
-            except:
-                print(">> " + bcolors.WARNING + "Failed to gather cookies..." + bcolors.ENDC)    
+                
 
     # Handles closing of webdriver instance
     def shutdown(self):
-        print(">>\n>> Session ID: " + self.session_id + " | >> Execute URL: " + self.executor_url)
+        # Attempt to gather cookies
+        try:
+            print(">> " + bcolors.OKCYAN + "Attempting to gather cookies from browser session..." + bcolors.ENDC)
+            utils.makedir("src/resources/cookies/")
+            cookie_dir = "src/resources/cookies/" + self.user['user'] + ".pk1"
+            pickle.dump(self.web.get_cookies(), open(cookie_dir, "wb"))
+            print(">> " + bcolors.OKCYAN + "Cookies successfully stored." + bcolors.ENDC)
+        except:
+            print(">> " + bcolors.WARNING + "Failed to gather cookies..." + bcolors.ENDC)
+
+        self.web.quit()
 
     # Dynamic scroll -> wait function
     def dScroll(self):
@@ -252,7 +266,8 @@ class userinstance():
                         artist_string = ""
                         for artist in artists:
                             artist_string = artist_string + artist + ", "
-                        artist_string.removesuffix(", ")       
+                        artist_string.removesuffix(", ")   
+                    artist = artist_string        
 
                     albumXPATH = baseXPATH  + "div[@aria-rowindex='" + str(i) + "']/div/div[3]/a"
                     album = self.web.find_element(By.XPATH, albumXPATH).text
@@ -294,80 +309,149 @@ class userinstance():
             print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)
 
         elif opcode == 1:
-            return 0
+            print(">>\t" + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from album '" + name + "'..." + bcolors.ENDC)
+            baseXPATH = "//section[@data-testid='artist-page']/div/div[2]/div[@class='contentSpacing']/div[@data-testid='track-list']/div[2]/div[2]"
+            i = 2
+            
+            while (i >= 2):
+                try:
+                    itemXPATH0 = baseXPATH  + "/div[@aria-rowindex='" + str(i) + "']/div/div[2]/div"
+                    
+                    titleXPATH = itemXPATH0 + "/div"
+                    title = self.web.find_element(By.XPATH, titleXPATH).text
+                    title = utils.cleanInput(title)
+
+                    j = 1
+                    artists = []
+                    try:
+                        try:
+                            artistXPATH = itemXPATH0 + "/span/a[" + str(j) + "]"
+                            artist = self.web.find_element(By.XPATH, artistXPATH).text
+                            artists.append[artist]
+                        except:
+                            artist_string = ""
+                            for artist in artists:
+                                artist_string = artist_string + artist + ", "
+                            artist_string.removesuffix(", ")       
+                    except:
+                        artistXPATH = itemXPATH0 + "/span/a"
+                        artist = self.web.find_element(By.XPATH, artistXPATH).text
+
+                    url = self.web.current_url
+
+                    pr = random.randint(1, 2) 
+
+                    if artist in ARTISTS:
+                        pr = 5                             
+
+                    song_obj = {
+                        "title": title,
+                        "artist": artist,
+                        "album": name,
+                        "album-url": url,
+                        "priority": pr
+                    }   
+
+                    song_object_directory = "src/resources/songs/" + str(pr) + "/"
+                    obj_name = title + ".json"
+                    utils.makedir(song_object_directory)
+
+                    if obj_name not in os.listdir(song_object_directory):
+                        jsonfile = os.path.join(song_object_directory + obj_name)
+                        with open(jsonfile, 'x')as obj:
+                            json.dump(song_obj, obj, indent=4)
+                        print(">>\t\t" + bcolors.OKGREEN + "Song \'" + title + "\' imported" + bcolors.ENDC)
+                    else:
+                        print(">>\t\t" + bcolors.WARNING + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
+                    
+                    time.sleep(random.randint(1, 4))
+                    i += 1
+                except Exception as E:
+                    print(">> " + bcolors.WARNING + "WARNING: Song import interrupted. Aborting process..." + bcolors.ENDC)
+                    # self.session
+                    i = 1    
+
 
     def importAlbums(self):
         print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Importing albums..." + bcolors.ENDC)
-        
-        # Removes outdated version 
-        if os.path.exists("src/spoticry__albums.json"):
-            with open("src/spoticry__albums.json", "r+") as jsonfile:
-                # Create object from file contents
-                filedata = json.load(jsonfile)
-                jsonfile.close()
 
         with open("src/resources/txt/albums.txt", "r+") as file:
             # Get lines containing album URLs
             lines = file.readlines()
 
             for line in lines:
-                # Get album URL
-                self.web.get(line)
-                self.dSleep()
-
-                title = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
-                self.dSleep()    
-
-                # Get artist of album, except multiple artists
                 try:
-                    i = 1
-                    artist = ""
-                    while i != 0:
-                        try:
-                            xpath = "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a[" + str(i) + "]"
-                            artists = self.web.find_element(By.XPATH, xpath).text
-                            artist = artist + artists + ", "
-                        except:
-                            i = 0
-                            artist.removesuffix(", ") 
-                    artist = utils.cleanInput(artist)        
+                    # Get album URL
+                    self.web.get(line)
                     self.dSleep()
+
+                    title = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
+                    self.dSleep()    
+
+                    # Get artist of album, except multiple artists
+                    try:
+                        i = 1
+                        artist = ""
+                        while i != 0:
+                            try:
+                                xpath = "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a[" + str(i) + "]"
+                                artists = self.web.find_element(By.XPATH, xpath).text
+                                artist = artist + artists + ", "
+                                i += 1
+                            except:
+                                i = 0
+                                artist.removesuffix(", ") 
+                        artist = utils.cleanInput(artist)        
+                        self.dSleep()
+                    except:
+                        artist = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a").text
+                        artist = utils.cleanInput(artist) 
+                        self.dSleep()   
+                            
+                    # Default priority scale
+                    pr = random.randint(1, 3)
+
+                    # 5% random chance, gets assigned a 4 priority rating
+                    if (utils.chance(5)):
+                        pr = 4
+
+                    if artist in ARTISTS:
+                        pr = 5
+
+                    url = self.web.current_url
+
+                    try:
+                        self.songScrape(1, title)
+                    except:
+                        raise SpoticryRuntimeError(">> ")
+
+                    album_object = {
+                        "title": title,
+                        "url": url,
+                        "artist": artist,
+                        "priority": pr
+                    }
+
+                    album_object_directory = "src/resources/album/" + str(pr) + "/"
+                    obj_name = title + ".json"
+                    utils.makedir(album_object_directory)
+
+                    if obj_name not in os.listdir(album_object_directory):
+                        jsonfile = os.path.join(album_object_directory + obj_name)
+                        with open(jsonfile, 'x')as obj:
+                            json.dump(album_object, obj, indent=4)
+
+                        print(">>\t" + bcolors.OKGREEN + "Album \'" + title + "\' by " + album_object[artist] + "imported" + bcolors.ENDC)
+                    else:
+                        print(">>\t" + bcolors.WARNING + "Album \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
+                except SpoticryRuntimeError:
+                    print(">> ")
                 except:
-                    artist = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/div/div[1]/a").text
-                    artist = utils.cleanInput(artist) 
-                    self.dSleep()   
-                        
-                # Default priority scale
-                pr = random.randint(1, 2)
-                if artist in ARTISTS:
-                    pr = 5
+                    print(">> " + bcolors.WARNING + "WARNING: Error parsing album.txt list, clearing text file and resuming..." + bcolors.ENDC)
+    
+            file.truncate(0)
 
-                url = self.web.current_url
-
-                album_object = {
-                    "title": title,
-                    "url": url,
-                    "artist": artist,
-                    "priority": pr
-                }
-
-                print(">>\t" + bcolors.OKGREEN + "Album \'" + title + "\' imported" + bcolors.ENDC)
-
-                if album_object not in filedata['playlists'][str(pr)]:
-                    filedata['playlists'][str(pr)].append(album_object)
-                else:
-                    print(">>\t" + bcolors.WARNING + "Album \'" + title + "\' entry already exists. Skipping..." + bcolors.ENDC)    
-
-                # Prevent temporary IP Ban
-                time.sleep(30)    
-
-        file.truncate(0)
-        os.remove("src/spoticry__albums.json")
-        
-        with open("src/spoticry__albums.json", "x") as jsonfile:
-            json.dumps(filedata, jsonfile, indent=4)
-
-        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Albums imported" + bcolors.ENDC)
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Playlists imported" + bcolors.ENDC)
 
     # Imports list of playlists in storage file.
     def importPlaylists(self):
@@ -395,7 +479,12 @@ class userinstance():
                     self.dSleep()
                     
                     # Default priority scale
-                    pr = random.randint(1, 2)
+                    pr = random.randint(1, 3)
+
+                    # 5% random chance, gets assigned a 4 priority rating
+                    if (utils.chance(5)):
+                        pr = 4
+
                     if author in AUTHORS:
                         pr = 5
 
@@ -466,8 +555,8 @@ class userinstance():
     def openQueue(self):
         self.dClick(self.site['songControls']['queueButton'])
 
-    # Opens playlist specified through url
-    def openPlaylist(self, url):
+    # Opens Spotify object specified through url
+    def openObject(self, url):
         self.web.get(url)
         self.dSleep()
 
@@ -504,35 +593,26 @@ class userinstance():
     def playPausePlaylist(self):
         self.dClick(self.site['playlistNav']['playlistPlayPause'])
 
-    # Option 0 - Unlike Playlist
-    # Option 1 - Like Playlist
-    def toggleLikePlaylist(self, option):
-        if (self.exists(self.site['playlistNav']['playlistLike_F']) and option == 1):
+    # Likes playlist
+    def likePlaylist(self):
+        if (self.exists(self.site['playlistNav']['playlistLike_F'])):
             self.dClick(self.site['playlistNav']['playlistLike_F'])
-        elif (self.exists(self.site['playlistNav']['playlistLike_T']) and option == 0):
+        else:
+            print(">> \t" + bcolors.WARNING + "Playlist already liked. Continuing..." + bcolors.ENDC)      
+
+    # Toggles like on playlist
+    def toggleLikePlaylist(self):
+        if (self.exists(self.site['playlistNav']['playlistLike_F'])):
+            self.dClick(self.site['playlistNav']['playlistLike_F'])
+        elif (self.exists(self.site['playlistNav']['playlistLike_T'])):
             self.dClick(self.site['playlistNav']['playlistLike_T'])    
         else:
             print(">> \t" + bcolors.WARNING + "Unable to perform operation under toggleLikePlaylist()" + bcolors.ENDC)    
 
     # Selects random playlist
     def selectPlaylist(self):
-        with open('src/spoticry__playlists.json', 'r') as file:
-            data = json.load(file)
-            playlists = data['playlists']
-
-            pr = utils.selectPriority()
-            if pr < 5:  # Temporary scale adjustor
-                pr = 1
-
-            results = []
-
-            for playlist in playlists:
-                if pr == playlist['priority']:
-                    results.append(playlist)    
-
-            index = random.randint(0, len(results)-1)
-
-            return results[index]
+        print(">> UNDER CONSTRUCTION - selectPlaylist()")
+        raise SpoticryRuntimeError
 
     # Searches for playlist based on one of the input parameters
     def searchPlaylist(self, title, author, priority):
@@ -567,7 +647,8 @@ class userinstance():
 
 def openUser():
     try:
-        filename = utils.select_file('src/resources/users/inactive')
+        file_ = random.choice(os.listdir('src/resources/users/inactive'))
+        filename = utils.select_file('src/resources/users/inactive/' + file_)
         movedir = filename.replace("inactive", "active")    
         shutil.move(filename, movedir)        
 
@@ -591,23 +672,70 @@ def quarantineUser(userpath):
         return user    
     except Exception as E:
         print(E)
-        sys.exit()         
+        sys.exit()       
+
+def selectSpotifyObject(objectname):
+    priority = utils.selectPriority(1)
+    if "playlist" in objectname:
+        parentdir = 'src/resources/playlists/' + priority + '/'
+        filename = random.choice(os.listdir(parentdir))    
+        obj_dir = parentdir + filename
+
+        with open(obj_dir, "r+") as file:
+            playlist = json.load(file)
+
+        return playlist
+
+    elif "song" in objectname:
+        print(">> " + bcolors.WARNING + "ATTENTION: Selecting a song loads the album associated with the song" + bcolors.ENDC)
+        parentdir = 'src/resources/songs/' + priority + '/'
+        filename = random.choice(os.listdir(parentdir))    
+        obj_dir = parentdir + filename
+
+        with open(obj_dir, "r+") as file:
+            song = json.load(file)
+
+        return song
+
+    elif "album" in objectname:
+        parentdir = 'src/resources/albums/' + priority + '/'
+        filename = random.choice(os.listdir(parentdir))    
+        obj_dir = parentdir + filename
+
+        with open(obj_dir, "r+") as file:
+            album = json.load(file)
+
+        return album 
+
+    elif "user" in objectname:
+        parentdir = 'src/resources/spotify-users/' + priority + '/'
+        filename = random.choice(os.listdir(parentdir))    
+        obj_dir = parentdir + filename
+
+        with open(obj_dir, "r+") as file:
+            user = json.load(file)
+
+        return user 
+        
+    print(">> " + bcolors.FAIL + "ERROR: Unable to parse input" + bcolors.ENDC)
+    raise SpoticryRuntimeError()        
 
 def newinstance(user):
 
     record = utils.startProcess()
 
-    # Debug grab random user
-    # user = openUser()
     user = {
         "email": "me@rengland.org",
         "user": "spoticry",
         "pass": "!8192Rde",
         "proxy": {
-            "ip": "45.72.53.148:6184",
+            "ip": "45.72.40.194:9288",
             "country": "US"
         }
     }
+
+    # Debug grab random user
+    # user = openUser()
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
@@ -616,13 +744,6 @@ def newinstance(user):
     test = userinstance(user, site, START)
 
     try:
-        '''
-        Quarantining:
-            test.selectPlaylist()
-        '''
-
-        
-
         # Song Controller (bottom panel) 
         #
         # test.playPause()  
@@ -641,10 +762,8 @@ def newinstance(user):
         # test.library()
         # test.likedSongs()
         # test.getPlaylists()
-        test.importPlaylists()
-        # test.importAlbums()
-    
-        
+        # test.importPlaylists()
+        test.importAlbums()
 
         raise SpoticryRuntimeError()
 
@@ -675,6 +794,6 @@ def newinstance(user):
         print(E)     
            
     print(utils.peakMemory(record))
-    test.web.quit()
+    test.shutdown()
 if __name__ == "__main__":
     newinstance(None)   

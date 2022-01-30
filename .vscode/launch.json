@@ -7,6 +7,21 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
+      "name": "AutoStream:spoticry/spoticore.newinstance (python3.9)",
+      "invokeTarget": {
+        "target": "code",
+        "projectRoot": "${workspaceFolder}/",
+        "lambdaHandler": "spoticry/spoticore.newinstance"
+      },
+      "lambda": {
+        "runtime": "python3.9",
+        "payload": {},
+        "environmentVariables": {}
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
       "name": "spoticry:spoticry/account.main (python3.9)",
       "invokeTarget": {
         "target": "code",

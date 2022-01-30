@@ -95,11 +95,11 @@ def cleanInput(name):
         i += 1
     return name    
 
-
+# Initializes recording feature in psutil library
 def startProcess(): 
     return psutil.Process()
 
-
+# Prints peak memory usage during script, converts to proper size abbreviation
 def peakMemory(process):
     size_bytes = process.memory_info().peak_wset
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
@@ -134,24 +134,19 @@ def get_sitemap():
     f.close()
     return sitemap
 
+# Returns odds out of 100, dice roll
+def chance(odds):
+    return True if random.randint(1, 100) <= odds else False    
 
-def selectPriority():
+
+def selectPriority(**debug):
     '''
     Uses weighted priority scale to determine which object of priority/5 gets chosen
     '''
+    if debug == 1:
+        return random.choice(seq=["1", "2", "5", "5", "5"], cum_weights=(5, 15, 35, 65, 100))
 
-    scale = random.randint(0, 99)
-
-    if scale > 59:      # 40%
-        return 5
-    elif scale > 34:    # 25%
-        return 4
-    elif scale > 14:    # 20%
-        return 3 
-    elif scale > 4:     # 10%
-        return 2
-    else:               # 5%
-        return 1           
+    return random.choice(seq=["1", "2", "3", "4", "5"], cum_weights=(5, 15, 35, 65, 100))     
 
 
 def select_entry(filename):
