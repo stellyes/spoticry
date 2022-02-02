@@ -1,6 +1,9 @@
-spoticry/src/json
-spoticry/src/img
-spoticry/src/webdriver/proxy.json
-spoticry/src/webdriver/sign_up/*
-spoticry/src/__pycache__
-
+spoticry/src/resources/users
+spoticry/src/resources/img
+spoticry/src/resources/webdriver
+spoticry/src/resources/albums
+spoticry/src/resources/artists
+spoticry/src/resources/playlists
+spoticry/src/resources/songs
+spoticry/src/resources/site-users
+spoticry/__pycache__
