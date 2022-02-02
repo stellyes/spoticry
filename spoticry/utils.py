@@ -34,7 +34,7 @@ WEBDRIVER = 'src/resources/webdriver/chromedriver.exe'
 REGION = 'us-west-2'
 
 BL_CHAR = ["/", chr(92),  '"', '.', '<', '>', ':', '?', '*']
-RP_CHAR = ["-", '+', '\'', '_', '_lb_', "_rb_", '_col_', '_q_', '_star_']
+RP_CHAR = ["_fs_", '_bs_', '_qt_', '_p_', '_lb_', "_rb_", '_col_', '_q_', '_star_']
 
 class bcolors:
     HEADER = '\033[95m'
@@ -175,7 +175,6 @@ def generate_random_string(length):
     '''
     Generates random string letters and numbers inclusive
     '''
-
     pool=string.ascii_lowercase+string.digits
     return "".join(random.choice(pool) for i in range(length))
 
@@ -184,7 +183,6 @@ def generate_random_text(length):
     '''
     Generates random string exclusively characters
     '''
-
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
 
 
@@ -192,7 +190,6 @@ def generate_password(length):
     '''
     Random password generator of length provided
     '''
-
     charset = string.ascii_letters + string.digits + '!#@&^*()<>?'
     password = ''.join(random.choice(charset) for i in range(length))
     return password
