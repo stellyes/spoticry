@@ -376,88 +376,7 @@ class userinstance():
                     # self.session
                     i = 1 
 
-            print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)        
-
-        elif opcode == 2:
-            print(">>\t" + bcolors.BOLD + bcolors.OKGREEN + "Scraping songs from artist '" + name + "'..." + bcolors.ENDC)
-            baseXPATH = "//div[@class='contentSpacing']/div[1]/div[@data-testid='grid-container']/div/"
-            flag, index = 1, 0
-
-            while(flag):
-                try:
-                    if index <= 4:
-                        button_xpath = baseXPATH + "button[@aria-expanded='false']"
-                        if self.exists(button_xpath):
-                            self.dClick(button_xpath)
-
-                    song_xpath = baseXPATH + "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']/div/div[2]/div/div"
-                    title = self.web.find_element(By.XPATH, song_xpath).text
-                    cleaned_title = utils.cleanInput(title)
-
-                    artist = name
-
-                    rowXPATH = baseXPATH + "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']"
-                    row = self.web.find_element(By.XPATH, rowXPATH)
-                    self.dClick(row)
-                    menuXPATH = rowXPATH + "/div[@data-testid='tracklist-row']/div[@aria-colindex='4']/button[@data-testid='more-button']"
-                    menu = self.web.find_element(By.XPATH, menuXPATH)
-                    self.dClick(menu)
-                    context_menu = self.web.find_element(By.XPATH, "//div[@id='context-menu']/ul[@role='menu']")
-                    go_to_album = context_menu.find_lement(By.XPATH, "//span[text()='Go to ablum']")
-                    self.dClick(go_to_album)
-
-                    #menu = baseXPATH + "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']/div/div[4]/button[@data-testid='more-button']"
-                    #self.dClick(menu)
-                    #self.dSleep()
-
-                    #go_to_album = "//div[@id='context-menu'][@data-placement='bottom-end']/ul[@role='menu']/li[3]"
-                    #self.dClick(go_to_album)
-                    #self.dSleep()
-
-                    album = "//section[@data-testid='album-page']/div[1]/div[5]/span/h1"
-                    album_name = self.web.find_element(By.XPATH, album).text
-                    album_name = utils.cleanInput(album_name)
-                    self.dSleep()
-
-                    url = self.web.current_url
-                    self.dSleep()
-
-                    self.navBack()
-                    self.dSleep()
-
-                    pr = random.randint(1, 3) 
-                    if artist in ARTISTS:
-                        pr = 5                             
-
-                    song_obj = {
-                        "title": cleaned_title,
-                        "artist": name,
-                        "album": album_name,
-                        "album-url": url,
-                        "priority": pr
-                    }   
-
-                    song_object_directory = "src/resources/songs/" + str(pr) + "/"
-                    obj_name = title + " - " + artist + ".json"
-                    utils.makedir(song_object_directory)
-
-                    if obj_name not in os.listdir(song_object_directory):
-                        jsonfile = os.path.join(song_object_directory + obj_name)
-                        with open(jsonfile, 'x')as obj:
-                            json.dump(song_obj, obj, indent=4)
-                        print(">>\t\t" + bcolors.OKGREEN + "Song \'" + title + "\' imported" + bcolors.ENDC)
-                    else:
-                        print(">>\t\t" + bcolors.WARNING + "Song \'" + title + "\' by " + artist + " entry already exists. Skipping..." + bcolors.ENDC)  
-                    
-                    time.sleep(random.randint(1, 4))
-
-                except NoSuchElementException as E:
-                    print(E)
-                    flag = 0 
-                except:    
-                    print(">> " + bcolors.WARNING + "WARNING: Song import interrupted. Aborting process..." + bcolors.ENDC)
-                    # self.session
-                    flag = 0      
+            print(">>\t" + bcolors.OKGREEN + "Complete" + bcolors.ENDC)            
 
     # Imports list of albums in storage file
     def importAlbums(self):
@@ -666,8 +585,6 @@ class userinstance():
                         "priority": pr
                     }
 
-                    self.songScrape(2, name)
-
                     artist_object_directory = "src/resources/artists/" + str(pr) + "/"
                     obj_name = name + ".json"
                     utils.makedir(artist_object_directory)
@@ -679,9 +596,9 @@ class userinstance():
                             json.dump(artist_obj, obj, indent=4)
                         imported.append(file)
 
-                        print(">>\t" + bcolors.OKGREEN + "Playlist \'" + name + "\' imported" + bcolors.ENDC)
+                        print(">>\t" + bcolors.OKGREEN + "Artist \'" + name + "\' imported" + bcolors.ENDC)
                     else:
-                        print(">>\t" + bcolors.WARNING + "Playlist \'" + name + "\' entry already exists. Skipping..." + bcolors.ENDC)                    
+                        print(">>\t" + bcolors.WARNING + "Artist \'" + name + "\' entry already exists. Skipping..." + bcolors.ENDC)                    
 
                 except SpoticryRuntimeError:
                     print(">> ")
@@ -690,7 +607,7 @@ class userinstance():
     
             file.truncate(0) 
 
-        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Playlists imported" + bcolors.ENDC)         
+        print(">> " + bcolors.BOLD + bcolors.OKGREEN + "Artists imported" + bcolors.ENDC)         
 
     # Return to open.spotify.com
     def home(self):
