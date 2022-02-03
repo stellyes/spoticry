@@ -1,3 +1,4 @@
+from email.mime import base
 import os
 import sys
 from tempfile import TemporaryFile
@@ -395,11 +396,14 @@ class userinstance():
 
                     artist = name
 
-                    a = ActionChains(self.web)
-                    hover = self.web.find_element(By.XPATH, "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']")
-                    a.context_click(hover).perform()
-                    self.dSleep()
-                    go_to_album = self.web.find_element(By.LINK_TEXT, "Go to album")
+                    rowXPATH = baseXPATH + "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']"
+                    row = self.web.find_element(By.XPATH, rowXPATH)
+                    self.dClick(row)
+                    menuXPATH = rowXPATH + "/div[@data-testid='tracklist-row']/div[@aria-colindex='4']/button[@data-testid='more-button']"
+                    menu = self.web.find_element(By.XPATH, menuXPATH)
+                    self.dClick(menu)
+                    context_menu = self.web.find_element(By.XPATH, "//div[@id='context-menu']/ul[@role='menu']")
+                    go_to_album = context_menu.find_lement(By.XPATH, "//span[text()='Go to ablum']")
                     self.dClick(go_to_album)
 
                     #menu = baseXPATH + "div[@data-testid='track-list']/div/div[2]/div[@aria-rowindex='" + str(index + 1) + "']/div/div[4]/button[@data-testid='more-button']"
