@@ -131,6 +131,9 @@
       "save": "//button[@data-testid='playlist-edit-details-save-button']"
     }
   },
+  "albumNav": {
+    "albumPlayPause": "//button[@data-testid='play-button']"
+  },
 
   "playlistShuffle": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[1]",
   "playlistLike": "//*[@id=\"main\"]/div/div[2]/div[3]/main/div[2]/div[2]/div/div/div[2]/section/div[2]/div[2]/div/button[2]",

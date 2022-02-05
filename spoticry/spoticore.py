@@ -137,6 +137,7 @@ class session():
     def getEstimatedProfit(self):
         return self.xstreams*0.00437, self.xstreams*0.00331 
 
+    # Record error and append to runtimeException attribute
     def error(self, error):
         try:
             self.runtimeExceptions.append(error)
@@ -286,7 +287,36 @@ class userinstance():
             self.dSleep()
             return False
         self.dSleep()    
-        return True      
+        return True    
+
+    def recursiveScrape(self, **opcode):
+        flag = 1
+
+
+        try:
+            while(flag):
+                try:
+                    for i in range(8):
+                        popular_releases = "//section[@aria-label='Popular releases']/div[@data-testid='grid-container']/div[" + str(i + 1) + "]/div"
+                        self.dClick(popular_releases)
+
+                        self.playPauseAlbum()
+                        self.dSleep()
+
+                        name = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
+                        self.dSleep()
+
+                        self.songScrape(1, name)
+                        self.navBack()
+
+                        self.dSleep()
+                except NoSuchElementException:
+                    print(">>\t" + bcolors.OKGREEN + "Finished parsing")
+
+
+        except KeyboardInterrupt:
+            print(">>\t" + bcolors.OKGREEN + "Terminating recursive scrape function, returning to home..." + bcolors.ENDC)
+            self.home()          
 
     # Scrapes song from passed in spotify object 'name'
     def songScrape(self, opcode, name):
@@ -740,6 +770,9 @@ class userinstance():
     def playPausePlaylist(self):
         self.dClick(self.site['playlistNav']['playlistPlayPause'])
 
+    def playPauseAlbum(self):
+        self.dClick(self.site['albumNav']['albumPlayPause'])    
+
     # Likes playlist
     def likePlaylist(self):
         if (self.exists(self.site['playlistNav']['playlistLike_F'])):
@@ -911,7 +944,7 @@ def newinstance(user):
         # test.getPlaylists()
         # test.importPlaylists()
         # test.importAlbums()
-        test.importArtists()
+        # test.importArtists()
 
         raise SpoticryRuntimeError()
 
