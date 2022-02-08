@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import json
+from turtle import title
 import utils
 import string
 import random
@@ -292,9 +293,9 @@ class userinstance():
     def recursiveScrape(self, **opcode):
         flag = 1
 
-
         try:
             while(flag):
+                # Parse popular releases and scrape songs
                 try:
                     for i in range(8):
                         popular_releases = "//section[@aria-label='Popular releases']/div[@data-testid='grid-container']/div[" + str(i + 1) + "]/div"
@@ -311,8 +312,36 @@ class userinstance():
 
                         self.dSleep()
                 except NoSuchElementException:
-                    print(">>\t" + bcolors.OKGREEN + "Finished parsing")
+                    print(">>\t" + bcolors.OKGREEN + "Finished parsing 'Popular Releases'..." + bcolors.ENDC)
+                except Exception as E:
+                    print(E)
+                    print(">>\t" + bcolors.FAIL + " FATAL ERROR: Error parsing 'Popular Releases'. Shutting down..." + bcolors.ENDC)
+                    self.shutdown()
 
+                # Parse albums and scrape songs
+                try:
+                    see_discography = "//section[@aria-label='Albums']/div[1]/div/a"
+                    self.dClick(see_discography)
+
+                    tile_view = "//section[@data-testid='artist-page']/div/div[1]/buttom[@aria-label='grid'][@aria-checked='false']"
+                    if self.exists(tile_view):
+                        self.dClick(tile_view)
+
+                    # THIS IS WHERE I LEFT OFF >> IN DISCOGRAPHY VIEW FOR ALBUMS
+                    # CLICKED ON TILE VIEW, NEED TO THEN CLICK THROUGH EACH ALBUM AND GET SONGS
+
+                    self.playPauseAlbum()
+                    self.dSleep()
+
+                    name = self.web.find_element(By.XPATH, "//section[@data-testid='album-page']/div[1]/div[5]/span/h1").text
+                    self.dSleep()
+
+                    self.songScrape(1, name)
+                    self.navBack()
+
+                    self.dSleep()
+                except NoSuchElementException:
+                    print(">>\t" + bcolors.OKGREEN + "Finished parsing 'Popular Releases'..." + bcolors.ENDC)
 
         except KeyboardInterrupt:
             print(">>\t" + bcolors.OKGREEN + "Terminating recursive scrape function, returning to home..." + bcolors.ENDC)
