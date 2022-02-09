@@ -144,7 +144,7 @@ def selectPriority(**debug):
     Uses weighted priority scale to determine which object of priority/5 gets chosen
     '''
     if debug == 1:
-        return random.choice(seq=["1", "2", "5", "5", "5"], cum_weights=(5, 15, 35, 65, 100))
+        return random.choice(seq=["1", "2", "3", "5", "5"], cum_weights=(5, 15, 35, 65, 100))
 
     return random.choice(seq=["1", "2", "3", "4", "5"], cum_weights=(5, 15, 35, 65, 100))     
 
