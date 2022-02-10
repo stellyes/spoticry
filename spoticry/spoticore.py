@@ -201,37 +201,48 @@ class userinstance():
             self.site = site     
             self.web = eval(self.site['login']['webdriver'])
 
-            # Builds corresponding URL to proxy host location
-            url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
+            if os.path.exists("src/resources/cookies/spoticry.pk1"):
+                self.web.get("https://open.spotify.com/")
+                cookies = pickle.load(open("src/resources/cookies/spoticry.pk1", "rb"))
+                for cookie in cookies:
+                    self.web.add_cookie(cookie)
+                time.sleep(3)
+                self.web.refresh()
+                print(">> " + bcolors.OKCYAN + "Webplayer succesfully initialized" + bcolors.ENDC)
+                time.sleep(1)
+                print(">> ")
+            else:
+                # Builds corresponding URL to proxy host location
+                url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
 
-            # Open Spotify login URL
-            self.web.get(url)   
-            self.web.maximize_window()
-            self.dSleep()
-            
-            # Input login credentials
-            self.dSend(site['login']['loginEmail'], user['email'])
-            self.dSend(site['login']['loginPassword'], user['pass'])
-            self.dClick(site['login']['loginButton'])
+                # Open Spotify login URL
+                self.web.get(url)   
+                self.web.maximize_window()
+                self.dSleep()
+                
+                # Input login credentials
+                self.dSend(site['login']['loginEmail'], user['email'])
+                self.dSend(site['login']['loginPassword'], user['pass'])
+                self.dClick(site['login']['loginButton'])
 
-            self.dSleep()
+                self.dSleep()
 
-            # Handles login errors
-            if self.exists("//div[@data-testid='login-container']/div[@role='alert']"):
-                errormessage = self.web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text
-                try:
-                    quarantineUser("src/resources/users/active/" + user['user'] + ".json")
-                except:
-                    print(">>\t" + bcolors.FAIL + "ERROR: Unable to quarantine user '" + user['user'] + "'" + bcolors.ENDC)   
-                print(">>\t" + bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + bcolors.ENDC)
-                raise Exception("\n>>\n>> END SESSION")
+                # Handles login errors
+                if self.exists("//div[@data-testid='login-container']/div[@role='alert']"):
+                    errormessage = self.web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text
+                    try:
+                        quarantineUser("src/resources/users/active/" + user['user'] + ".json")
+                    except:
+                        print(">>\t" + bcolors.FAIL + "ERROR: Unable to quarantine user '" + user['user'] + "'" + bcolors.ENDC)   
+                    print(">>\t" + bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + bcolors.ENDC)
+                    raise Exception("\n>>\n>> END SESSION")
 
-            # Click Webplayer option
-            self.dClick(site['login']['webplayerButton']) 
+                # Click Webplayer option
+                self.dClick(site['login']['webplayerButton']) 
 
-            print(">> " + bcolors.OKCYAN + "Webplayer succesfully initialized" + bcolors.ENDC)
-            time.sleep(1)
-            print(">> ")
+                print(">> " + bcolors.OKCYAN + "Webplayer succesfully initialized" + bcolors.ENDC)
+                time.sleep(1)
+                print(">> ")
 
     # Handles closing of webdriver instance
     def shutdown(self):
