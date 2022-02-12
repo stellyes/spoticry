@@ -1,20 +1,13 @@
-import sys
-import json
 import time
 import utils
-import string
+import pickle
 import random
 import requests
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import NoAlertPresentException
 
 def request(user):
     headers= {
@@ -56,8 +49,77 @@ def request(user):
         print(">> Spotify account failed initialization - 400")
         False, time.time()
 
+def initialize(user):
+    chrome_options = webdriver.ChromeOptions()          
+
+    chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+    chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
+    chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_argument("disable-infobars")
+    chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging        
+
+    print(">>\tLogging into Spotify...")
+    # Builds corresponding URL to proxy host location
+    url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
+
+
+    web = webdriver.Chrome(executable_path=r"src/resources/webdriver/chromedriver.exe", options=chrome_options)
+    # Open Spotify login URL
+    web.get(url)   
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))  
+    
+    print(">>\tFilling Credentials...")
+    # Input login credentials
+    a = web.find_element(By.XPATH, "//*[@id='login-username']")
+    a.send_keys(user['email'])
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+    
+    a = web.find_element(By.XPATH, "//*[@id='login-password']")
+    a.send_keys(user['pass'])
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+    
+    print(">>\tAttempting to login...")
+    a = web.find_element(By.XPATH, "//*[@id='login-button']")
+    a.click()
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+    # Handles login errors
+    if elementExists(web, "//div[@data-testid='login-container']/div[@role='alert']"):
+        errormessage = web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text   
+        print(">>\t" + utils.bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + utils.bcolors.ENDC)
+        return False, time.time()
+    else:
+        print(">>\tLoading webplayer...")
+        # Click Webplayer option
+        a = web.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/button[2]")
+        a.click()
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+    try:
+        print(">>\tAttempting to gather cookies")
+        utils.makedir("src/resources/cookies/")
+        cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
+        pickle.dump(web.get_cookies(), open(cookie_dir, "wb"))
+        print(">>\tCookies successfully stored")
+    except:
+        print(">>\tFailed to gather cookies")
+
+    web.quit()    
+    return True, time.time()    
+
+def elementExists(web, xpath):
+    try:
+        web.find_element(By.XPATH, xpath)
+    except NoSuchElementException:
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+        return False
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))     
+    return True   
 
 def main():
+    record = utils.startProcess()
     valid = False
 
     while not valid:
@@ -127,18 +189,27 @@ def main():
             
         # Send credentials to sign-up page using webdriver
         print(">> Verifying user...")
-        site = utils.get_sitemap()
         status, date = request(newUser)
         newUser["created"]["status"] = status
         newUser["created"]["date"] = date
 
-        # Print generated user to JSON file
-        time.sleep(30)
-        utils.create_user(newUser)
+        # Login to create cookie file and verify user existence
+        print(">> Initializing user...")
+        status, date = initialize(newUser)
+        newUser["verified"]["status"] = status
+        newUser["verified"]["date"] = date
 
-        print(">> " + utils.bcolors.BOLD + "User " + newUser["user"] + " successfully generated" + utils.bcolors.ENDC)
+        # Print generated user to JSON file
+        time.sleep(180)
+        if status == True:
+            utils.create_user(newUser)
+            print(">> " + utils.bcolors.BOLD + "User " + newUser["user"] + " successfully generated" + utils.bcolors.ENDC)
+        else:
+            print(">> " + utils.bcolors.FAIL + utils.bcolors.BOLD + "User " + newUser["user"] + " generation failed" + utils.bcolors.ENDC)
+
     
     print(">>\n>> " + utils.bcolors.OKGREEN + utils.bcolors.BOLD + str(amount) + " users successfully generated. Closing..." + utils.bcolors.ENDC + "\n")
+    utils.peakMemory(record)
 
 
 if __name__ == "__main__":

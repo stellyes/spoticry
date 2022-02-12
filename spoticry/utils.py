@@ -267,12 +267,13 @@ def get_proxy():
     Pick random proxy server in directorty
     '''  
 
-    root = 'src/resources/proxies/US.txt'  
-    #file = random.choice(os.listdir(root))                   
-    #country = root + file
-    proxy = select_entry(root)
+    root = 'src/resources/proxies/'  
+    file = random.choice(os.listdir(root))                   
+    country = root + file
+    proxy = select_entry(country)
+    parsed_country = country.removesuffix(".txt").removeprefix("src/resources/proxies/")
 
-    return { "ip": proxy, "country": "US" } # file.removesuffix('.txt')
+    return { "ip": proxy, "country": parsed_country } # file.removesuffix('.txt')
 
 
 def create_user(data):

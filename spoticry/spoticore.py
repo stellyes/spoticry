@@ -20,67 +20,7 @@ from selenium.common.exceptions import NoSuchElementException
 # First page has been parsed, reference this:
 # https://developers.whatismybrowser.com/useragents/explore/software_name/spotify/2
 
-USER_AGENT_PC = [
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.31.703 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.32.618 Safari/537.36",
-    "Spotify/117400631 Win32/0 (PC desktop)",
-    "Spotify/117300517 Win32/0 (PC laptop)",
-    "Spotify/117400631 Win32/0 (PC laptop)",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.33.569 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.30.658 Safari/537.36",
 
-]
-
-USER_AGENT_iOS = [
-    "Spotify/1.0",
-    "Spotify/8.6.84 iOS/15.1 (iPhone12,1)",
-    "Spotify/8.6.84 iOS/15.1.1 (iPhone13,2)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone11,8)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone12,8)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone10,4)",
-    "Spotify/8.6.82 iOS/14.8.1 (iPhone12,1)",
-    "Spotify/8.6.94 iOS/15.1.1 (iPhone13,2)",
-    "Spotify/8.6.82 iOS/14.8.1 (iPhone13,2)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone11,2)",
-    "Mozilla/5.0 (iPhone; CPU OS 12_2_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25 Spotify/856800921 (36; 2; 3)",
-    "Spotify/8.6.84 iOS/15.1.1 (iPhone13,1)",
-    "Spotify/8.6.96 iOS/15.1 (iPhone12,1)",
-    "Spotify/8.6.82 iOS/15.1 (iPhone12,1)",
-    "Spotify/8.6.84 iOS/14.8.1 (iPhone10,4)",
-    "Spotify/8.6.84 iOS/14.8.1 (iPhone13,3)",
-    "Spotify/8.6.84 iOS/14.8.1 (iPhone13,3)",
-    "Spotify/8.6.96 iOS/15.1 (iPhone12,8)",
-    "Spotify/8.6.84 iOS/14.8.1 (iPhone9,3)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone9,3)",
-    "Spotify/8.6.30 iOS/14.6 (iPhone10,4)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone12,5)",
-    "Spotify/8.6.96 iOS/15.1.1 (iPhone13,2)",
-    "Spotify/8.6.84 iOS/15.1.1 (iPhone13,3)",
-    "Spotify/8.6.84 iOS/15.1.1 (iPhone14,5)",
-    "Spotify/8.6.84 iOS/14.8.1 (iPhone12,1)",
-    "Spotify/8.6.82 iOS/15.1 (iPhone13,2)",
-    "Spotify/8.6.30 iOS/14.6 (iPhone12,8)",
-    "Spotify/8.6.84 iOS/14.7.1 (iPhone12,3)",
-    "Spotify/8.6.52 iOS/14.6 (iPhone12,8)",
-    "Spotify/8.6.84 iOS/15.1 (iPhone12,3)"
-]
-
-USER_AGENT_ANDROID = [
-    "Spotify/1.0",
-    "Spotify/8.6.88.1104 Android/30 (SM-A415F)",
-    "Spotify/8.6.88.1104 Android/30 (SM-G973F)",
-    "Spotify/8.6.94.306 Android/30 (M2102J20SG)",
-    "Spotify/8.6.94.306 Android/30 (SM-G975F)",
-    "Spotify/8.6.88.1104 Android/30 (SM-A525F)",
-    "Spotify/8.4.49 Android/28 (LG)",
-    "Spotify/8.6.88.1104 Android/30 (SM-A505FN)",
-    "Spotify/8.6.98.900 Android/31 (SM-G986B)",
-    "Spotify/8.4.88 Android/28 (SM-A105FN)",
-    "Spotify/8.6.88.1104 Android/30 (SM-G981B)",
-    "Spotify/8.6.74.1176 Android/30 (SM-G991B)",
-    "Spotify/8.6.84.1240 Android/30 (SM-A705FN)",
-
-]
 
 START = "start"
 RESUME = "resume"
@@ -172,7 +112,7 @@ class userinstance():
         # Options argument initalization
         chrome_options = webdriver.ChromeOptions()          
 
-        # chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+        chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
         # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_argument("--mute-audio")                                             # Mute audio output
         #chrome_options.add_argument(f'user-agent={random.choice(USER_AGENT_PC)}')
@@ -194,16 +134,21 @@ class userinstance():
         self.site = site     
         self.web = eval(self.site['login']['webdriver'])
 
-        if os.path.exists("src/resources/cookies/spoticry.pk1"):
+        # Equipped to auto-login if user has been logged in before
+        if os.path.exists("src/resources/cookies/" + self.user['user'] + ".pk1"):
             self.web.get("https://open.spotify.com/")
             cookies = pickle.load(open("src/resources/cookies/spoticry.pk1", "rb"))
             for cookie in cookies:
                 self.web.add_cookie(cookie)
             time.sleep(3)
             self.web.refresh()
+            self.web.maximize_window()
+            self.dSleep()
             print(">> " + bcolors.OKCYAN + "Webplayer succesfully initialized" + bcolors.ENDC)
             time.sleep(1)
             print(">> ")
+
+        # If user is new, initialize login    
         else:
             # Builds corresponding URL to proxy host location
             url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
@@ -295,11 +240,12 @@ class userinstance():
         self.dSleep()    
         return True    
 
-    def recursiveScrape(self, iurl="https://open.spotify.com/artist/36r4ltZmLqtiDBdAs9XSqn", **opcode):
+    def recursiveScrape(self, **opcode):
         print(">> " + bcolors.OKGREEN + "Starting recursive scrape function..." + bcolors.ENDC)
 
         imported = []
-        scraped = []
+        scraped = ["https://open.spotify.com/artist/36r4ltZmLqtiDBdAs9XSqn"]
+        i = 0
 
         # Collects all imported album file names
         utils.makedir("src/resources/artists/")
@@ -308,114 +254,97 @@ class userinstance():
                 if(file.endswith(".json")):
                     imported.append(file.removesuffix(".json"))
 
-        if iurl not in scraped:
-            try:
-                while(1):
-                    url = scraped.pop()
-                    self.web.get(url)
+        try:
+            while(1):
+                url = scraped.pop()   
+                self.web.get(url)
+                self.dSleep()
+    
+                name = self.web.find_element(By.XPATH, "//section[@data-testid='artist-page']/div/div[1]/div[2]/span[2]/h1").text
+
+                print(">> " + bcolors.OKGREEN + "Parsing items from " + name + "..." + bcolors.ENDC)
+                # Parse discography and add to txt files
+                try:
+                    discography_albums_url = url + "/discography/album"
+                    discography_songs_url = url + "/discography/single"
+                    related_artists = url + "/related"
+                    discovered_on = url + "/discovered-on"
+                    
+                    scraped.append(self.web.current_url)
+
+                    print(">>\t\t" + bcolors.OKGREEN + "Parsing albums..." + bcolors.ENDC)
+                    self.web.get(discography_albums_url)
                     self.dSleep()
-        
-                    name = self.web.find_element(By.XPATH, "//section[@data-testid='artist-page']/div/div[1]/div[2]/span[2]/h1").text
 
-                    print(">> " + bcolors.OKGREEN + "Parsing items from " + name + "..." + bcolors.ENDC)
-                    # Parse discography and add to txt files
-                    try:
-                        discography_albums_url = url + "/discography/album"
-                        discography_songs_url = url + "/discography/single"
-                        discography_appearson = url + "/appears-on"
-                        related_artists = url + "/related"
-                        
-                        scraped.append(self.web.current_url)
+                    gridview = "//section[@data-testid='artist-page']/div/div[1]/button[@aria-label='grid']"
+                    enabled_grid = self.web.find_element(By.XPATH, gridview).get_attribute('aria-checked')
 
-                        print(">>\t\t" + bcolors.OKGREEN + "Parsing albums..." + bcolors.ENDC)
-                        self.web.get(discography_albums_url)
+                    if enabled_grid == 'false':
+                        self.dClick(gridview)
 
-                        gridview = "//section[@data-testid='artist-page']/div/div[1]/button[@aria-label='grid']"
-                        enabled_grid = self.web.find_element(By.XPATH, gridview).get_attribute('aria-checked')
+                    self.dSleep()
+                    with open("src/resources/txt/albums.txt", "a") as file:
+                        i = 1
+                        try:
+                            while(True):
+                                albumxpath = "//section[@data-testid='artist-page']/div/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
+                                albumlink = self.web.find_element(By.XPATH, albumxpath).get_attribute('href')
+                                file.write(albumlink + "\n")
+                                i += 1
+                                time.sleep(1)
+                        except NoSuchElementException:
+                            print(">>\t\t\t" + bcolors.OKGREEN + "Finished parsing albums!" + bcolors.ENDC)
+                    
 
-                        if enabled_grid == 'false':
-                            self.dClick(gridview)
-
-                        self.dSleep()
-                        with open("src/resources/txt/albums.txt", "a") as file:
-                            i = 1
-                            try:
-                                while(True):
-                                    albumxpath = "//section[@data-testid='artist-page']/div/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
-                                    albumlink = self.web.find_element(By.XPATH, albumxpath).get_attribute('href')
-                                    file.write(albumlink + "\n")
-                                    i += 1
-                                    time.sleep(1)
-                            except NoSuchElementException:
-                                print(">>\t\t\t" + bcolors.OKGREEN + "Finished parsing albums!" + bcolors.ENDC)
-                        
-
-                        print(">>\t\t" + bcolors.OKGREEN + "Parsing singles and EPs..." + bcolors.ENDC)
-                        self.web.get(discography_songs_url)
-
-                        self.dSleep()
-                        with open("src/resources/txt/albums.txt", "a") as file:
-                            i = 1
-                            try:
-                                while(True):
-                                    albumxpath = "//section[@data-testid='artist-page']/div/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
-                                    albumlink = self.web.find_element(By.XPATH, albumxpath).get_attribute('href')
-                                    file.write(albumlink + "\n")
-                                    i += 1
-                                    time.sleep(1)
-                            except NoSuchElementException:
-                                print(">>\t\t\t" + bcolors.OKGREEN + "Finished parsing singles and EPs!" + bcolors.ENDC)
+                    print(">>\t\t" + bcolors.OKGREEN + "Parsing singles and EPs..." + bcolors.ENDC)
+                    self.web.get(discography_songs_url)
+                    self.dSleep()
+                    with open("src/resources/txt/albums.txt", "a") as file:
+                        i = 1
+                        try:
+                            while(True):
+                                albumxpath = "//section[@data-testid='artist-page']/div/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
+                                albumlink = self.web.find_element(By.XPATH, albumxpath).get_attribute('href')
+                                file.write(albumlink + "\n")
+                                i += 1
+                                time.sleep(1)
+                        except NoSuchElementException:
+                            print(">>\t\t\t" + bcolors.OKGREEN + "Finished parsing singles and EPs!" + bcolors.ENDC)
 
 
-                        print(">>\t\t" + bcolors.OKGREEN + "Parsing featured releases..." + bcolors.ENDC)
-                        self.web.get(discography_appearson)   
-                        self.dSleep()       
-                        with open("src/resources/txt/albums.txt", "a") as file:
-                            i = 1
-                            try:
-                                while(True):
-                                    albumxpath = "//section[@data-testid='artist-page']/div/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
-                                    albumlink = self.web.find_element(By.XPATH, albumxpath).get_attribute('href')
-                                    file.write(albumlink + "\n")
-                                    i += 1
-                                    time.sleep(1)
-                            except NoSuchElementException:
-                                print(">>\t\t\t" + bcolors.OKGREEN + "Finished parsing featured releases!" + bcolors.ENDC)    
+                    print(">>\t\t" + bcolors.OKGREEN + "Parsing related artists..." + bcolors.ENDC)
+                    self.web.get(related_artists)      
+                    self.dSleep()      
+                    with open("src/resources/txt/artists.txt", "a") as file:
+                        i = 1
+                        try:
+                            while(True):
+                                artistxpath = "//section[@aria-label='Fans also like']/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
+                                artistlink = self.web.find_element(By.XPATH, artistxpath).get_attribute('href')
+                                file.write(artistlink + "\n")
+                                if artistlink not in imported:
+                                    imported.append(artistlink)
+                                i += 1
+                                time.sleep(1)
+                        except NoSuchElementException:
+                            print(">>\t" + bcolors.OKGREEN + "Finished parsing related artists..." + bcolors.ENDC)   
 
+                except NoSuchElementException:
+                    print(">>\t" + bcolors.OKGREEN + "Finished parsing " + name + "!" + bcolors.ENDC)
+                except Exception as E:
+                    print(E)
+                    print(">>\t" + bcolors.FAIL + " FATAL ERROR: Error parsing " + name + ". Shutting down..." + bcolors.ENDC)
+                    self.shutdown()    
 
-                        print(">>\t\t" + bcolors.OKGREEN + "Parsing related artists..." + bcolors.ENDC)
-                        self.web.get(related_artists)      
-                        self.dSleep()      
-                        with open("src/resources/txt/artists.txt", "a") as file:
-                            i = 1
-                            try:
-                                while(True):
-                                    artistxpath = "//section[@aria-label='Fans also like']/div[@data-testid='grid-container']/div[" + str(i) + "]/div/div[2]/a"
-                                    artistlink = self.web.find_element(By.XPATH, artistxpath).get_attribute('href')
-                                    file.write(artistlink + "\n")
-                                    if artistlink not in imported:
-                                        imported.append(artistlink)
-                                    i += 1
-                                    time.sleep(1)
-                            except NoSuchElementException:
-                                print(">>\t" + bcolors.OKGREEN + "Finished parsing related artists..." + bcolors.ENDC)   
-
-                    except NoSuchElementException:
-                        print(">>\t" + bcolors.OKGREEN + "Finished parsing " + name + "!" + bcolors.ENDC)
-                    except Exception as E:
-                        print(E)
-                        print(">>\t" + bcolors.FAIL + " FATAL ERROR: Error parsing " + name + ". Shutting down..." + bcolors.ENDC)
-                        self.shutdown()    
-
-            except KeyboardInterrupt:
-                print(">>\t" + bcolors.OKGREEN + "Terminating recursive scrape function, returning to home..." + bcolors.ENDC)
-                self.home()     
-            except NoSuchElementException:
-                print(">>\t" + bcolors.WARNING + "Unable to find element on page... ending recursive scrape" + bcolors.ENDC)      
-            except Exception as E:
-                print(E)
-                print(">>\t" + bcolors.FAIL + " FATAL ERROR - Shutting down..." + bcolors.ENDC)
-                self.shutdown()      
+        except KeyboardInterrupt:
+            print(">>\t" + bcolors.OKGREEN + "Terminating recursive scrape function, returning to home..." + bcolors.ENDC)
+            self.home()     
+        except NoSuchElementException:
+            print(">>\t" + bcolors.WARNING + "Unable to find element on page... ending recursive scrape" + bcolors.ENDC)      
+        except Exception as E:
+            print(E)
+            print(">>\t" + bcolors.FAIL + " FATAL ERROR - Shutting down..." + bcolors.ENDC)
+            self.shutdown()      
 
 
     # Scrapes song from passed in spotify object 'name'
@@ -1024,6 +953,31 @@ def newinstance(user):
         }
     }
 
+    user = {
+        "email": "snoringJung@rengland.org",
+        "user": "60Brittini",
+        "pass": "VQdywjYwFq#8aj",
+        "dob": {
+            "day": 6,
+            "month": 10,
+            "year": 1993
+        },
+        "gender": 0,
+        "opt_in": 0,
+        "proxy": {
+            "ip": "45.192.146.235:6246",
+            "country": "IT"
+        },
+        "created": {
+            "status": True,
+            "date": 1644659215.8843055
+        },
+        "verified": {
+            "status": "",
+            "date": ""
+        }
+    }
+
     # Debug grab random user
     # user = openUser()
 
@@ -1056,7 +1010,9 @@ def newinstance(user):
         # test.importAlbums()
         # test.importArtists()
 
-        test.recursiveScrape()
+        #test.recursiveScrape()
+
+        time.sleep(15)
 
         raise SpoticryRuntimeError()
 
