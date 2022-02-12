@@ -137,7 +137,7 @@ class userinstance():
         # Equipped to auto-login if user has been logged in before
         if os.path.exists("src/resources/cookies/" + self.user['user'] + ".pk1"):
             self.web.get("https://open.spotify.com/")
-            cookies = pickle.load(open("src/resources/cookies/spoticry.pk1", "rb"))
+            cookies = pickle.load(open("src/resources/cookies/" + self.user['user'] + ".pk1", "rb"))
             for cookie in cookies:
                 self.web.add_cookie(cookie)
             time.sleep(3)
@@ -243,8 +243,7 @@ class userinstance():
     def recursiveScrape(self, **opcode):
         print(">> " + bcolors.OKGREEN + "Starting recursive scrape function..." + bcolors.ENDC)
 
-        imported = []
-        scraped = ["https://open.spotify.com/artist/36r4ltZmLqtiDBdAs9XSqn"]
+        imported = ["https://open.spotify.com/artist/36r4ltZmLqtiDBdAs9XSqn"]
         i = 0
 
         # Collects all imported album file names
@@ -256,7 +255,7 @@ class userinstance():
 
         try:
             while(1):
-                url = scraped.pop()   
+                url = imported.pop()   
                 self.web.get(url)
                 self.dSleep()
     
@@ -269,8 +268,6 @@ class userinstance():
                     discography_songs_url = url + "/discography/single"
                     related_artists = url + "/related"
                     discovered_on = url + "/discovered-on"
-                    
-                    scraped.append(self.web.current_url)
 
                     print(">>\t\t" + bcolors.OKGREEN + "Parsing albums..." + bcolors.ENDC)
                     self.web.get(discography_albums_url)
@@ -343,7 +340,7 @@ class userinstance():
             print(">>\t" + bcolors.WARNING + "Unable to find element on page... ending recursive scrape" + bcolors.ENDC)      
         except Exception as E:
             print(E)
-            print(">>\t" + bcolors.FAIL + " FATAL ERROR - Shutting down..." + bcolors.ENDC)
+            print(">>" + bcolors.FAIL + " FATAL ERROR - Shutting down..." + bcolors.ENDC)
             self.shutdown()      
 
 
@@ -953,33 +950,33 @@ def newinstance(user):
         }
     }
 
+    # Debug grab random user
+    user = openUser()
+
     user = {
-        "email": "snoringJung@rengland.org",
-        "user": "60Brittini",
-        "pass": "VQdywjYwFq#8aj",
+        "email": "11Devina@rengland.org",
+        "user": "Coor18",
+        "pass": "w6MIr80Ul",
         "dob": {
-            "day": 6,
-            "month": 10,
-            "year": 1993
+            "day": 26,
+            "month": 6,
+            "year": 2006
         },
-        "gender": 0,
-        "opt_in": 0,
+        "gender": 1,
+        "opt_in": 1,
         "proxy": {
-            "ip": "45.192.146.235:6246",
-            "country": "IT"
+            "ip": "45.72.55.61:7098",
+            "country": "CA"
         },
         "created": {
             "status": True,
-            "date": 1644659215.8843055
+            "date": 1644661304.8842616
         },
         "verified": {
-            "status": "",
-            "date": ""
+            "status": True,
+            "date": 1644661339.678572
         }
     }
-
-    # Debug grab random user
-    # user = openUser()
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
@@ -1010,7 +1007,7 @@ def newinstance(user):
         # test.importAlbums()
         # test.importArtists()
 
-        #test.recursiveScrape()
+        test.recursiveScrape()
 
         time.sleep(15)
 

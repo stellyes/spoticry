@@ -53,7 +53,7 @@ def initialize(user):
     chrome_options = webdriver.ChromeOptions()          
 
     chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
-    chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
+    #chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
     chrome_options.add_argument('--disable-blink-features=AutomationControlled')
     chrome_options.add_experimental_option('useAutomationExtension', False)
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -97,14 +97,16 @@ def initialize(user):
         a = web.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/button[2]")
         a.click()
         time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
-    try:
-        print(">>\tAttempting to gather cookies")
-        utils.makedir("src/resources/cookies/")
-        cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
-        pickle.dump(web.get_cookies(), open(cookie_dir, "wb"))
-        print(">>\tCookies successfully stored")
-    except:
-        print(">>\tFailed to gather cookies")
+
+        time.sleep(180)
+        try:
+            print(">>\tAttempting to gather cookies")
+            utils.makedir("src/resources/cookies/")
+            cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
+            pickle.dump(web.get_cookies(), open(cookie_dir, "wb"))
+            print(">>\tCookies successfully stored")
+        except:
+            print(">>\tFailed to gather cookies")
 
     web.quit()    
     return True, time.time()    
