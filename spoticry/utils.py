@@ -1,5 +1,6 @@
 import os
 import sys
+import wmi
 import time
 import json
 import math
@@ -133,6 +134,13 @@ def get_sitemap():
     sitemap = json.load(f)
     f.close()
     return sitemap
+
+def get_useragents():
+    # User agent storage object
+    f = open("src/useragent.json")
+    useragents = json.load(f)
+    f.close()
+    return useragents    
 
 # Returns odds out of 100, dice roll
 def chance(odds):

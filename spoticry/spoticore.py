@@ -9,6 +9,8 @@ import pickle
 import hashlib
 import requests
 
+import account
+
 from utils import bcolors
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,8 +21,6 @@ from selenium.common.exceptions import NoSuchElementException
 
 # First page has been parsed, reference this:
 # https://developers.whatismybrowser.com/useragents/explore/software_name/spotify/2
-
-
 
 START = "start"
 RESUME = "resume"
@@ -115,7 +115,7 @@ class userinstance():
         chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
         # chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
         chrome_options.add_argument("--mute-audio")                                             # Mute audio output
-        #chrome_options.add_argument(f'user-agent={random.choice(USER_AGENT_PC)}')
+        chrome_options.add_argument(f'user-agent={user["user_agent"]}')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         chrome_options.add_experimental_option('useAutomationExtension', False)
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -940,7 +940,7 @@ def newinstance(user):
 
     record = utils.startProcess()
 
-    user = {
+    adminuser = {
         "email": "me@rengland.org",
         "user": "spoticry",
         "pass": "!8192Rde",
@@ -950,33 +950,13 @@ def newinstance(user):
         }
     }
 
-    # Debug grab random user
-    user = openUser()
+    # user = useradmin
 
-    user = {
-        "email": "11Devina@rengland.org",
-        "user": "Coor18",
-        "pass": "w6MIr80Ul",
-        "dob": {
-            "day": 26,
-            "month": 6,
-            "year": 2006
-        },
-        "gender": 1,
-        "opt_in": 1,
-        "proxy": {
-            "ip": "45.72.55.61:7098",
-            "country": "CA"
-        },
-        "created": {
-            "status": True,
-            "date": 1644661304.8842616
-        },
-        "verified": {
-            "status": True,
-            "date": 1644661339.678572
-        }
-    }
+    # Debug grab random user
+    # user = openUser()
+
+    # Debug quickstart account
+    user = account.quickstart()
 
     # Create sitemap and trigger objects for webdriver
     site = utils.get_sitemap()
