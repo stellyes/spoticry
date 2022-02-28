@@ -50,10 +50,85 @@ def request(user):
         print(">> Spotify account failed initialization - 400")
         False, time.time()
 
+# Function to login, relogin, relogin... so on and so forth. 
+# Should take place ideally over the course of days until 
+# enough user data is instantiated and the account is successfully
+# verified via the email confirmation... need 2 automate that
+def sustain(user):
+    chrome_options = webdriver.ChromeOptions()          
+
+    #chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+    #chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
+    chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_argument("disable-infobars")
+    chrome_options.add_experimental_option("excludeSwitches", ["disable-popup-blocking"])   # Disable pop-ups? maybe?
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])           # Disable all logging   
+    
+    print(">>\tLogging into Spotify...")
+    # Builds corresponding URL to proxy host location
+    url = "https://accounts.spotify.com/" + user['proxy']['country'].lower() + "/login"
+
+
+    web = webdriver.Chrome(executable_path=r"src/resources/webdriver/chromedriver.exe", options=chrome_options)
+    # Open Spotify login URL
+    web.get(url)   
+    time.sleep(random.randint(15, 20))  
+    
+    print(">>\tFilling Credentials...")
+    # Input login credentials
+    a = web.find_element(By.XPATH, "//*[@id='login-username']")
+    a.send_keys(user['email'])
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+    
+    a = web.find_element(By.XPATH, "//*[@id='login-password']")
+    a.send_keys(user['pass'])
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+    
+    print(">>\tAttempting to login...")
+    a = web.find_element(By.XPATH, "//*[@id='login-button']")
+    a.click()
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+    # Handles login errors
+    if elementExists(web, "//div[@data-testid='login-container']/div[@role='alert']"):
+        errormessage = web.find_element(By.XPATH, "//div[@data-testid='login-container']/div[@role='alert']/span/p").text   
+        print(">>\t" + utils.bcolors.FAIL + "ERROR: Login failed \"" + errormessage.removesuffix('.') + "\". Shutting down." + utils.bcolors.ENDC)
+        return False, time.time()
+    else:
+        print(">>\tLoading webplayer...")
+        # Click Webplayer option
+        a = web.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/button[2]")
+        a.click()
+        time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+        time.sleep(45)
+
+        # Accept cookies button
+        if elementExists(web, "//button[@id='onetrust-accept-btn-handler']"):
+            a = web.find_element(By.XPATH, "//button[@id='onetrust-accept-btn-handler']")
+            a.click()
+            time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+        updateProfileData(web)    
+
+        try:
+            print(">>\tAttempting to gather cookies")
+            utils.makedir("src/resources/cookies/")
+            cookie_dir = "src/resources/cookies/" + user['user'] + ".pk1"
+            pickle.dump(web.get_cookies(), open(cookie_dir, "wb"))
+            print(">>\tCookies successfully stored")
+        except:
+            print(">>\tFailed to gather cookies")
+
+    web.quit()  
+    return 0
+
 def initialize(user):
     chrome_options = webdriver.ChromeOptions()          
 
-    chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
+    #chrome_options.add_argument('--proxy-server=%s' % user['proxy']['ip'])                  # Assigns proxy
     #chrome_options.add_argument('--headless')                                             # Specifies GUI display, set to headless (NOGUI)
     chrome_options.add_argument('--disable-blink-features=AutomationControlled')
     chrome_options.add_experimental_option('useAutomationExtension', False)
@@ -107,6 +182,8 @@ def initialize(user):
             a.click()
             time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
+        updateProfileData(web)    
+
         try:
             print(">>\tAttempting to gather cookies")
             utils.makedir("src/resources/cookies/")
@@ -115,12 +192,6 @@ def initialize(user):
             print(">>\tCookies successfully stored")
         except:
             print(">>\tFailed to gather cookies")
-
-        # Accept cookies button
-        if elementExists(web, "//button[text()=''"):
-            a = web.find_element(By.XPATH, "")
-            a.click()
-            time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
     web.quit()    
     return True, time.time()    
@@ -134,21 +205,35 @@ def elementExists(web, xpath):
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10)))     
     return True   
 
-def updateProfileData(web, xpath):
+def updateProfileData(web):
+    # User menu
     web.find_element(By.XPATH, "//button[@data-testid='user-widget-link']").click()
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
+    # Click profile
     web.find_element(By.XPATH, "//div[@id='context-menu']/div/ul/li[2]/a/span").click()
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
+    # Edit profile
     web.find_element(By.XPATH, "//button[@title='Edit details']").click()
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
     
+    # Clear profile picture
     web.find_element(By.XPATH, "//input[@type='file']").clear()
-    web.find_element(By.XPATH, "//input[@type='file']").send_keys("C:\\fakepath\\Screenshot 2021-12-30 235148.png")
-    web.find_element_by_id("user-edit-name").click()
-    web.find_element(By.XPATH, "(.//*[normalize-space(text()) and normalize-space(.)='Name'])[1]/following::button[1]").click()
-    web.find_element(By.XPATH, "(.//*[normalize-space(text()) and normalize-space(.)='ryan'])[1]/preceding::*[name()='svg'][2]").click()    
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+    # Insert new profile picture
+    web.find_element(By.XPATH, "//input[@type='file']").send_keys(utils.absolutePath(utils.fetch_image(1)))
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+    # Save changes
+    web.find_element(By.XPATH, "(//button[text()='Save']").click() 
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+
+    # Navigate back
+    web.find_element(By.XPATH, "//button[@data-testid='top-bar-back-button']").click()
+    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
+   
 
 def quickstart():
     valid = False

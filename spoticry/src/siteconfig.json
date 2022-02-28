@@ -1,9 +1,4 @@
 {
-  "signup": {
-    "link": {
-      "us": "https://www.spotify.com/us/signup"
-    }
-  },
   "login": {
     "webdriver": "webdriver.Chrome(executable_path=r\"src/resources/webdriver/chromedriver.exe\", options=chrome_options)",
     "loginEmail": "//*[@id=\"login-username\"]",

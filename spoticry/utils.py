@@ -1,6 +1,5 @@
 import os
 import sys
-import wmi
 import time
 import json
 import math
