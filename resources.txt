@@ -1,3 +1,8 @@
+AWS keys for GBL laptop
+ACCESS KEY ID: AKIAZWMSKVUDYGCU52ZW
+SECRET ACCESS KEY: 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
+Deez: Nuts
+
 Proxies for cheap, high concurrency can run tons of accounts
 from limited number of proxies (500 proxies, 5000+ instances of concurrency)
     $39.06 Monthly Cost
