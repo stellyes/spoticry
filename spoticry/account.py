@@ -213,13 +213,9 @@ def updateProfileData(web):
     # Click profile
     web.find_element(By.XPATH, "//div[@id='context-menu']/div/ul/li[2]/a/span").click()
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
-
-    # Edit profile
-    web.find_element(By.XPATH, "//button[@title='Edit details']").click()
-    time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
     
     # Clear profile picture
-    web.find_element(By.XPATH, "//input[@type='file']").clear()
+    web.find_element(By.XPATH, "//button[@data-testid='edit-image-button']").click()
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
     # Insert new profile picture
@@ -227,7 +223,7 @@ def updateProfileData(web):
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
     # Save changes
-    web.find_element(By.XPATH, "(//button[text()='Save']").click() 
+    web.find_element(By.XPATH, "//div[@aria-label='Profile details']/div/form/button").click() 
     time.sleep(random.randint(random.randint(3, 4), random.randint(6, 10))) 
 
     # Navigate back
