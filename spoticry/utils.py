@@ -252,11 +252,10 @@ def generate_email(domain_index):
     '''
     Generates email address
     '''
-
     # Generate random string for email
     base_string = generate_username()
 
-    email = base_string + '@rengland.org'
+    email = base_string + '@mailsac.com'
 
     return email
 

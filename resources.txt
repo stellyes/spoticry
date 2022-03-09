@@ -1,7 +1,6 @@
 AWS keys for GBL laptop
 ACCESS KEY ID: AKIAZWMSKVUDYGCU52ZW
 SECRET ACCESS KEY: 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
-Deez: Nuts
 
 Mailsac API key: k_kVsKS05Xl5TcgdfjUSLlnU0N4ivDr9wf404
 
