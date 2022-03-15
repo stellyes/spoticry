@@ -1,5 +1,6 @@
-{
-  "PC": [
+
+
+PC = [
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.31.703 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.32.618 Safari/537.36",
     "Spotify/117400631 Win32/0 (PC desktop)",
@@ -7,8 +8,9 @@
     "Spotify/117400631 Win32/0 (PC laptop)",
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.33.569 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Spotify/1.1.30.658 Safari/537.36"
-  ],
-  "iOS": [
+  ]
+IOS = [
+    "Spotify/1.0",
     "Spotify/8.6.84 iOS/15.1 (iPhone12,1)",
     "Spotify/8.6.84 iOS/15.1.1 (iPhone13,2)",
     "Spotify/8.6.84 iOS/15.1 (iPhone11,8)",
@@ -39,8 +41,8 @@
     "Spotify/8.6.84 iOS/14.7.1 (iPhone12,3)",
     "Spotify/8.6.52 iOS/14.6 (iPhone12,8)",
     "Spotify/8.6.84 iOS/15.1 (iPhone12,3)"
-  ],
-  "Android": [
+  ]
+ANDROID = [
     "Spotify/8.6.88.1104 Android/30 (SM-A415F)",
     "Spotify/8.6.88.1104 Android/30 (SM-G973F)",
     "Spotify/8.6.94.306 Android/30 (M2102J20SG)",
@@ -54,4 +56,3 @@
     "Spotify/8.6.74.1176 Android/30 (SM-G991B)",
     "Spotify/8.6.84.1240 Android/30 (SM-A705FN)"
   ]
-}

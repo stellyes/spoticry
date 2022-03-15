@@ -271,15 +271,15 @@ def quickstart():
         # Generate random proxy from list of scraped proxies
         proxy_info = utils.get_proxy()
         # Get user agent from user agent list
-        useragents = utils.get_useragents()
-        pclist = useragents["PC"]
-        useragent = pclist[random.randrange(len(useragents))]
+        #useragents = utils.get_useragents()
+        #pclist = useragents["PC"]
+        #useragent = pclist[random.randrange(len(useragents))]
 
         print(">> Credentials for " + username + " generated")
 
         # Create email user in AWS
-        print(">> Initializing email in AWS WorkMail...")
-        resp = utils.create_email(username, password, email)
+        #print(">> Initializing email in AWS WorkMail...")
+        #resp = utils.create_email(username, password, email)
 
         # Create spotifyUser dictionary
         newUser = {
@@ -293,7 +293,6 @@ def quickstart():
             },
             "gender": gender,
             "opt_in": marketing_info,
-            "user_agent": useragent,
             "proxy": proxy_info,
             "created": {
                 "status": '',
