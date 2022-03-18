@@ -3,47 +3,6 @@ import time
 import json
 import string
 import random
-import requests
-
-def request(user):
-    headers= {
-        "Accept-Encoding": "gzip",
-        "Accept-Language": "en-US",
-        "App-Platform": "Android",
-        "Connection": "Keep-Alive",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Host": "spclient.wg.spotify.com",
-        "User-Agent": "Spotify/8.6.72 Android/29 (SM-N976N)",
-        "Spotify-App-Version": "8.6.72",
-        "X-Client-Id": utils.generate_random_string(32)
-    }
-    
-    payload = {
-    "creation_point": "client_mobile",
-    "gender": "male" if random.randint(0, 1) else "female",
-    "birth_year": random.randint(1990, 2000),
-    "displayname": user['user'],
-    "iagree": "true",
-    "birth_month": random.randint(1, 11),
-    "password_repeat": user['pass'],
-    "password": user['pass'],
-    "key": "142b583129b2df829de3656f9eb484e6",
-    "platform": "Android-ARM",
-    "email": user['email'],
-    "birth_day": random.randint(1, 20)
-    }
-
-    r = requests.post('https://spclient.wg.spotify.com/signup/public/v1/account/', headers=headers, data=payload, proxies={"http": user['proxy']['ip']})
-    time.sleep(random.randint(3, 5))
-
-    if r.status_code==200:
-        if r.json()['status']==1:
-            return True, time.time()
-        else:
-            False, time.time()
-    else:
-        print(">> Spotify account failed initialization - 400")
-        False, time.time()
 
 class dob:
     def __init__(self, month, day, year):
@@ -55,7 +14,6 @@ def select_entry(filename):
     '''
     Selects random string from random line in text document
     '''
-
     with open(filename, "r") as doc:
         text = doc.read()
         words = list(map(str, text.split()))
@@ -124,14 +82,8 @@ def generate_email():
 
     email = base_string + '@mailsac.com'
 
-    return email
+    return email, base_string
 
-def generate_birthday(dob_month, dob_day, dob_year):
-    '''
-    Generate complete indexed date-of-birth object
-    '''
-    #month = MONTHS[dob_month]
-    return dob(dob_month, dob_day, dob_year)  
 
 def get_proxy():
     '''
@@ -142,35 +94,35 @@ def get_proxy():
     file = random.choice(os.listdir(root))                   
     country = root + file
     proxy = select_entry(country)
-    parsed_country = country.removesuffix(".txt").removeprefix("resources/proxies/")
+    parsed_country = file[:-4]
 
-    return { "ip": proxy, "country": parsed_country } # file.removesuffix('.txt')      
+    return { "ip": proxy, "country": parsed_country } # file.removesuffix('.txt')    
+    
 
 def lambda_handler(event, context):
     print(">>\n>> Generating new user...")
 
     # Random elements initialized
     password_length = random.randint(8, 16)
-    domain_index = random.randint(0, 9)
     dob_month = random.randint(1, 11)
     dob_day = random.randint(1, 28)
     dob_year = random.randint(1982, 2006)
-
-    # Generate spotifyUser data
-    # Generate temp email address and email MD5 hash token
-    email = generate_email(domain_index)
-
-    # Generate random username
-    username = generate_username()
+    
+    # Generate temp email address
+    print(">> Generating email and username")
+    email, username = generate_email()
     # Generate random password
-    password = generate_password(password_length)
+    print(">> Generating password")
+    charset = string.ascii_letters + string.digits + '!#@&^*()<>?'
+    password = ''.join(random.choice(charset) for i in range(password_length))
     # Generate random birthday
-    birthday = generate_birthday(dob_month, dob_day, dob_year)
+    print(">> Generating birthday")
+    birthday = dob(dob_month, dob_day, dob_year)
     # Generate random gender selection
+    print(">> Generating gender")
     gender = random.randint(0, 2)
-    # Generate random response to marketing infomation
-    marketing_info = random.randint(0, 1)
     # Generate random proxy from list of scraped proxies
+    print(">> Generating proxy")
     proxy_info = get_proxy()
 
     print(">> Credentials for " + username + " generated")
@@ -186,27 +138,11 @@ def lambda_handler(event, context):
             "year": birthday.year
         },
         "gender": gender,
-        "opt_in": marketing_info,
         "proxy": proxy_info,
         "created": {
-            "status": '',
-            "date": ''
-        },
-        "verified": {
             "status": '',
             "date": ''
         }
     }
 
-    # Send credentials to sign-up page using webdriver
-    print(">> Verifying user...")
-    status, date = request(newUser)
-    newUser["created"]["status"] = status
-    newUser["created"]["date"] = date
-
-    if status == True:
-        return ({ "response": True, "body": json.dumps(newUser) })
-    elif status == False:
-        return ({ "response": False, "body": json.dumps('Error in sign-up request for user ' + newUser['username']) })
-    else:
-        return ({ "response": False, "body": json.dumps("Critical failure in sign-up process") })
+    return ({ "response": 200, "body": newUser })   

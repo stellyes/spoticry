@@ -277,10 +277,6 @@ def quickstart():
 
         print(">> Credentials for " + username + " generated")
 
-        # Create email user in AWS
-        #print(">> Initializing email in AWS WorkMail...")
-        #resp = utils.create_email(username, password, email)
-
         # Create spotifyUser dictionary
         newUser = {
             "email": email,

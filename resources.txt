@@ -5,7 +5,7 @@ SECRET ACCESS KEY: GhRUgtqv8bC+Ne3JfnejoL1koCGCDTDl0SW0fxHw
 Mailsac API key: k_kVsKS05Xl5TcgdfjUSLlnU0N4ivDr9wf404
 
 RDS Credentials
-username: rengland
+username: admin
 password: !8192Rde
 
 RDS Login Terminal:

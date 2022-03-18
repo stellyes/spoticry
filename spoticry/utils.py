@@ -18,20 +18,7 @@ import datetime
 from requests import HTTPError 
 
 
-# Supported regions for Spotify
-SUPPORTED_REGIONS = ["AD", "AR", "AS", "AT", "BE", "BO", "BR", "BG",
-                     "CA", "CL", "CO", "CR", "CY", "CZ", "DK", "DO",
-                     "EC", "SV", "EE", "FI", "FR", "DE", "GR", "GT",
-                     "HN", "HU", "IS", "IN", "ID", "IE", "IL", "IT",
-                     "JP", "LV", "LI", "LT", "LU", "MY", "MT", "MX",
-                     "MC", "NL", "NZ", "NI", "NO", "PA", "PY", "PE",
-                     "PH", "PL", "PT", "RO", "RU", "SA", "SG", "SK",
-                     "ZA", "KR", "ES", "SE", "CH", "TW", "TH", "TR",
-                     "AE", "UK", "US", "UY", "VN"]
-
-WEBMAIL_ORG_ID = 'm-32a11f6f87e54cb0b1756a5a6b963f5f'
 WEBDRIVER = 'src/resources/webdriver/chromedriver.exe'
-REGION = 'us-west-2'
 
 BL_CHAR = ["/", chr(92),  '"', '.', '<', '>', ':', '?', '*']
 RP_CHAR = ["_fs_", '_bs_', '_qt_', '_p_', '_lb_', "_rb_", '_col_', '_q_', '_star_']
@@ -46,13 +33,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-class dob:
-    def __init__(self, month, day, year):
-        self.month = month
-        self.day = day
-        self.year = year
-
 
 def makedir(path):
     '''
@@ -107,6 +87,7 @@ def peakMemory(process):
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     result = "PEAK MEMORY USAGE: %s %s" % (s, size_name[i])
+    psutil.Process(process).terminate()
     print(">> " + bcolors.BOLD + bcolors.OKBLUE + result + bcolors.ENDC) 
 
 def count(path):
@@ -176,111 +157,6 @@ def select_file(filepath):
         return absolutePath(filepath)
     except:
         raise Exception(">> " + bcolors.FAIL + "ERROR: File selection failed. Shutting down..." + bcolors.ENDC)   
-
-
-def generate_random_string(length): 
-    '''
-    Generates random string letters and numbers inclusive
-    '''
-    pool=string.ascii_lowercase+string.digits
-    return "".join(random.choice(pool) for i in range(length))
-
-
-def generate_random_text(length):
-    '''
-    Generates random string exclusively characters
-    '''
-    return "".join(random.choice(string.ascii_lowercase) for i in range(length))
-
-
-def generate_password(length):
-    '''
-    Random password generator of length provided
-    '''
-    charset = string.ascii_letters + string.digits + '!#@&^*()<>?'
-    password = ''.join(random.choice(charset) for i in range(length))
-    return password
-
-
-def generate_username():
-    '''
-    Random username generator
-    '''
-
-    markers = [0, 0, 0, 0]          # Markers used to prevent duplicate entries
-    op0 = random.randint(0, 99)     # appended numbers to username
-    op1 = ''                        # first name options
-    op2 = ''                        # last name options
-    op3 = ''                        # random word from words list
-    username = ''                   # empty username string
-
-    for i in range(2):
-        # Get random marker
-        username_order = random.randint(0, 3)
-
-        # If marker indicates the choice has already been made
-        if (markers[username_order] == 1):
-            if username_order == 3:                 # If polled int is 3, wrap around to 0
-                username_order = 0
-            else:
-                username_order = username_order + 1  # If polled int is < 3, increment
-
-        if username_order == 0:
-            markers[0] = 1
-            username = username + str(op0)
-        elif username_order == 1:
-            markers[1] = 1
-            op1 = select_entry("src/resources/txt/fname.txt")
-            username = username + op1
-        elif username_order == 2:
-            markers[2] = 1
-            op2 = select_entry("src/resources/txt/lname.txt")
-            username = username + op2
-        elif username_order == 3:
-            markers[3] = 1
-            op3 = select_entry("src/resources/txt/words.txt")
-
-            # If length of string is unreasonably long, reselect
-            while len(op3) > 8:
-                op3 = select_entry("src/resources/txt/words.txt")
-            username = username + op3
-
-    return username
-
-
-def generate_email(domain_index):
-    '''
-    Generates email address
-    '''
-    # Generate random string for email
-    base_string = generate_username()
-
-    email = base_string + '@mailsac.com'
-
-    return email
-
-
-def generate_birthday(dob_month, dob_day, dob_year):
-    '''
-    Generate complete indexed date-of-birth object
-    '''
-    #month = MONTHS[dob_month]
-    return dob(dob_month, dob_day, dob_year)
-
-
-def get_proxy():
-    '''
-    Pick random proxy server in directorty
-    '''  
-
-    root = 'src/resources/proxies/'  
-    file = random.choice(os.listdir(root))                   
-    country = root + file
-    proxy = select_entry(country)
-    parsed_country = country.removesuffix(".txt").removeprefix("src/resources/proxies/")
-
-    return { "ip": proxy, "country": parsed_country } # file.removesuffix('.txt')
-
 
 def create_user(data):
     '''
