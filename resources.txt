@@ -8,6 +8,10 @@ RDS Credentials
 username: admin
 password: !8192Rde
 
+'spoticry-account-windows' ec2 instance login:
+DNS: ec2-35-88-195-110.us-west-2.compute.amazonaws.com
+user: Administrator
+pass: we952.jBgV2D4Qt3BOcxe&SO&I=EMZx5
 RDS Login Terminal:
 mysql -h spoticry.c4synwmrwf4b.us-west-2.rds.amazonaws.com -P 3306 -u rengland -p 
 
