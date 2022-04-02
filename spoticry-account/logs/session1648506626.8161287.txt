@@ -1,0 +1,29 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for ShawnettaAmalong generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>>	Searching for proxy settings
+>>	Typing proxy IP
+>>	Typing proxy port
+>>	Saving proxy settings
+>>	Priming URL bar for text input
+>> Changing WiFi URI Location
+>> Navigating to settings
+>> Clearing risk barrier
+>> Opening sign-up url
+>> Maximizing window
+>> Filling email entry
+>> Filling email confirmation entry
+>> Filling password entry
+>> Filling username entry
+>> Filling month entry
+>> Filling day entry
+>> Filling year entry
+>> Filling gender entry
+>> Filling registration data
+>> ERROR: Unable to find element on screen
+cannot unpack non-iterable NoneType object
+UPTIME: 416.61362171173096

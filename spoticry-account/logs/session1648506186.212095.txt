@@ -1,0 +1,18 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for 7Walton generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>>	Searching for proxy settings
+>>	Typing proxy IP
+>>	Typing proxy port
+>>	Saving proxy settings
+>>	Priming URL bar for text input
+>> Changing WiFi URI Location
+>> Navigating to settings
+>> Clearing risk barrier
+>> ERROR: Unable to find element on screen
+cannot unpack non-iterable NoneType object
+UPTIME: 163.9374647140503

@@ -1,0 +1,21 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for SantoniKong generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>>	Searching for proxy settings
+>>	Typing proxy IP
+>>	Typing proxy port
+>>	Saving proxy settings
+>>	Priming URL bar for text input
+>> Opening sign-up url
+>> Maximizing window
+>> Filling email entry
+>> Filling email confirmation entry
+>> Filling password entry
+>> Filling username entry
+>> Filling month entry
+Failed to read img/months4.PNG because file is missing, has improper permissions, or is an unsupported or invalid format
+UPTIME: 258.80217814445496

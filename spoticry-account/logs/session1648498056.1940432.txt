@@ -1,0 +1,12 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for 28Elija generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>>	Searching for proxy settings
+>>	Typing proxy IP
+>> ERROR: Unable to find element on screen
+cannot unpack non-iterable NoneType object
+UPTIME: 33.82682418823242

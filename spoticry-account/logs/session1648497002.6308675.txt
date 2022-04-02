@@ -1,0 +1,18 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for thirstle38 generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>>	Searching for proxy settings
+>>	Typing proxy IP
+>>	Typing proxy port
+>>	Saving proxy settings
+>>	Priming URL bar for text input
+>> Opening sign-up url
+>> Filling email entry
+>> Filling email confirmation entry
+>> Filling password entry
+'password'
+UPTIME: 202.08601140975952

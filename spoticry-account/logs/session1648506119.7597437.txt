@@ -1,0 +1,10 @@
+>> Generating user data
+>> Gathering username and proxy details
+>> Credentials for subsonic57 generated
+>> Locating Firefox logo
+>> Updating proxy settings
+>>	Opening settings menu
+>>	Clicking 'settings'
+>> ERROR: Unable to find element on screen
+cannot unpack non-iterable NoneType object
+UPTIME: 24.867541313171387
