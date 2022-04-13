@@ -1,8 +1,8 @@
 import os
-import sys
 import time
 import json
 import string
+import platform
 import requests
 import pyautogui
 
@@ -13,8 +13,10 @@ from random import uniform as rf
 from requests import HTTPError 
 
 pyautogui.FAILSAFE = True
-PROXY_USER = 'spoticrier'
-PROXY_PASS = 'kdsg3n5k6bbm02hnkc9sy789'
+CODE = ['AU', 'CA', 'DE', 'ES', 'FI', 'FR', 'IT', 'NL', 'NO', 'SE', 'UA', 'UK', 'US']
+VPN = ['Australia', 'Canada', 'Germany', 'Spain', 'Finland',
+       'France', 'Italy', 'Netherlands', 'Norway', 'Sweden',
+       'Ukraine', 'United Kingdom', 'United States']
 
 class dob:
     def __init__(self, month, day, year):
@@ -71,7 +73,7 @@ def select_entry(filename):
     '''
     with open(filename, "r") as doc:
         text = doc.read()
-        words = list(map(str, text.split()))
+        words = list(map(str, text.split('\n')))
     doc.close()
     return rc(words)
 
@@ -82,6 +84,22 @@ def generate_password(length):
     charset = string.ascii_letters + string.digits + '!#@&^*()<>?'
     password = ''.join(rc(charset) for i in range(length))
     return password    
+
+def vpn_connect(country):
+    '''
+    Connects to server with corresponding country location
+    '''
+    command = "nordvpn -c -g '" + country
+    os.system(command)
+    wait(15)
+
+def vpn_disconnect():
+    '''
+    Disconnects from NordVPN server
+    '''
+    command = "nordvpn -d"
+    os.system(command)
+    wait(15)
 
 def generate_username():
     '''
@@ -128,26 +146,21 @@ def generate_username():
 
     return username 
     
-def get_proxy():
+def get_location():
     '''
-    Pick random proxy server in directorty
+    Pick random location in directorty
     '''  
-    root = 'resources/proxies/'  
+    root = 'resources/coordinates/'  
     file = rc(os.listdir(root))                   
     country = root + file
-    proxy = select_entry(country)
-    parsed_country = file[:-4]
+    coordinates = select_entry(country)
+    parsed_country = VPN[CODE.index[file[:-4]]]
 
-    coordinatefile = 'resources/coordinates/' + file 
-    with open(coordinatefile, "r") as cf:
-        lines = cf.readlines()
-        coordinates = rc(lines).strip('\n')
-
-    return { "ip": proxy, "country": parsed_country, "coordinates": coordinates }    
+    return { "country": parsed_country, "coordinates": coordinates }    
 
 def getUser():
 
-    print(">> Gathering username and proxy details")
+    print(">> Generating user credentials")
     
     # Random elements initialized
     password_length = ri(8, 16)
@@ -161,7 +174,8 @@ def getUser():
     password = ''.join(rc(charset) for i in range(password_length)) # Generate random password
     birthday = dob(dob_month, dob_day, dob_year)                    # Generate random birthday
     gender = ri(0, 2)                                               # Generate random gender selection
-    proxy = get_proxy()                                             # Fetch proxy from random file
+    useragent = select_entry("resources/data/useragents.txt")       # Fetch random user agent from list
+    vpn = get_location()                                            # Fetch location information
 
 
     print(">> Credentials for " + username + " generated")
@@ -177,161 +191,83 @@ def getUser():
             "year": birthday.year
         },
         "gender": gender,
-        "proxy": proxy,
+        "useragent": useragent,
+        "location": vpn,
         "status": 0
     }    
 
+    print(user)
     return user
 
-def proxySignIn():
-    pyautogui.typewrite(PROXY_USER, interval=round(rf(0.25, 0.6), 2))
-    wait()
-    pyautogui.press('tab')
-    pyautogui.typewrite(PROXY_PASS, interval=round(rf(0.25, 0.6), 2))
-    wait()
-    pyautogui.press('tab')
-    wait()
-    pyautogui.press('enter') 
-        
-def defineProxy(proxy):
-    # Parse proxy into [ip address] and [port] segments
-    ip, port = proxy.split(':')    
-    wait(2)
-
-    # Open firefox settings menu
-    print(">> Updating proxy settings")
-    print(">>\tOpening settings menu")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-settings.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=4)
-    pyautogui.click()
-    wait(1)   
-
-    # Click 'settings'
-    print(">>\tClicking 'settings'")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-settings-button.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait(1)
-    
-    # Search for proxy settings
-    print(">>\tSearching for proxy settings")
-    pyautogui.typewrite('proxy', interval=round(rf(0.25, 0.6), 2))
-    wait(1)
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-proxy-settings.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait(1)
-
-    # Input proxy and port
-    print(">>\tTyping proxy IP")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/manual-proxy-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click() 
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-http-proxy-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    pyautogui.press('backspace', presses=7)
-    pyautogui.typewrite(ip, interval=round(rf(0.25, 0.6), 2))
-    print(">>\tTyping proxy port")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-http-port-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    pyautogui.press('backspace', presses=1)
-    pyautogui.typewrite(port, interval=round(rf(0.25, 0.6), 2))
-    wait(1)
-
-    # Save proxy settings
-    print(">>\tSaving proxy settings")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-save-proxy-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    wait(60)
-
-    proxySignIn()
-
-    print(">>\tPriming URL bar for text input")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-proxy-settings-url-bar.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    wait(1)
-
-def clearProxy():
-    # Open firefox settings menu
-    print(">> Clearing proxy settings")
-    print(">>\tOpening settings menu")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-settings.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=4)
-    pyautogui.click()
-    wait(1)   
-
-    # Click 'settings'
-    print(">>\tClicking 'settings'")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-settings-button.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait(1)
-    
-    # Search for proxy settings
-    print(">>\tSearching for proxy settings")
-    pyautogui.typewrite('proxy', interval=round(rf(0.25, 0.6), 2))
-    wait(1)
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-proxy-settings.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait(1)
-
-    # Clearing proxy settings
-    print(">>\tClearing proxy data")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-http-proxy-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    pyautogui.press('backspace', presses=15)
-    pyautogui.typewrite('0.0.0.0', interval=round(rf(0.25, 0.6), 2))
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-http-port-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    pyautogui.press('backspace', presses=4)
-    pyautogui.press('1')
-    wait(1)
-
-    print(">>\tSaving proxy settings")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-save-proxy-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
-    pyautogui.click()
-    wait(2)
-
 def changeLocation(coordinates):
-    print(">> Changing WiFi URI Location")
-    print(">> Navigating to settings")
+    print(">> Changing geo provider")
+    print(">>\tNavigating to settings")
+    pyautogui.typewrite("about:config")
+    pyautogui.typewrite(['enter'])
+    wait(1)
+
+    print(">>\tClearing risk barrier")
+    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-caution-config.PNG", confidence=0.8)
+    pyautogui.moveTo(ffx, ffy)
+    pyautogui.click()
+    wait(1)
+
+    print(">>\tLocating provider")
+    pyautogui.typewrite("geo.provider.network.url")
+    wait(1)
+
+    print(">>\tEditing...")
+    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-edit-wifi-geo-config.PNG", confidence=0.8)
+    pyautogui.moveTo(ffx, ffy)
+    pyautogui.click()
+    wait(1)
+
+    print(">>\tParsing and entering coordinates")
+    lat, lon = coordinates.split(', ')
+    locationinfo = 'data:application/json,{"location": {"lat": ' + lat + ', "lng": ' + lon + '}, "accuracy": 27000.0}'
+    pyautogui.typewrite(locationinfo)
+    pyautogui.typewrite(['enter'])
+    wait(1)
+
+    print(">>\tSaving geo provider settings")
+    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-location-settings-url-bar.PNG", confidence=0.8)
+    pyautogui.moveTo(ffx, ffy)
+    pyautogui.click()
+    wait(1)
+
+def changeUserAgent(useragent):
+    print(">> Changing user agent")
+    print(">>\tNavigating to settings")
     pyautogui.typewrite("about:config")
     pyautogui.typewrite(['enter'])
     wait()
 
-    print(">> Clearing risk barrier")
+    print(">>\tClearing risk barrier")
     ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-caution-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
+    pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
-    wait()
+    wait(1)
 
-    pyautogui.typewrite("geo.wifi.uri", interval=round(rf(0.25, 0.6), 2))
-    wait()
+    print(">>\tLocating user agent definition")
+    pyautogui.typewrite("general.useragent.override")
+    wait(1)
 
+    print(">>\tEditing...")
     ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-edit-wifi-geo-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
+    pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
-    wait()
+    wait(1)
 
-    lat, lon = coordinates.split(', ')
-    locationinfo = 'data:application/json,{"location": {"lat": ' + lat + ', "lng": ' + lon + '}, "accuracy": 27000.0}'
-    pyautogui.typewrite(locationinfo, interval=round(rf(0.25, 0.6), 2))
+    print(">>\tEntering user agent information")
+    pyautogui.typewrite(useragent)
     pyautogui.typewrite(['enter'])
-    wait()
+    wait(1)
 
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-location-settings-url-bar.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=1)
+    print(">>\tSaving user agent settings")
+    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-useragent-settings-url-bar.PNG", confidence=0.8)
+    pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
-    wait()
-
+    wait(1)
 
 def main():
 
@@ -341,25 +277,27 @@ def main():
     # Locate and open Firefox
     print(">> Locating Firefox logo")
     ffx, ffy = pyautogui.locateCenterOnScreen("img/firefoxHomeScreen.png", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=3)
+    pyautogui.moveTo(ffx, ffy, duration=1)
     pyautogui.doubleClick()
     wait()
 
-    defineProxy(user['proxy']['ip'])
+    # Hide browser/device from websites
+    vpn_connect(user['proxy']['country'])
     changeLocation(user['proxy']['coordinates'])
+    changeUserAgent(user['useragent'])
 
     # Go to Spotify signup page
     print(">> Opening sign-up url")
-    pyautogui.typewrite('spotify.com/' + user['proxy']['country'].lower() + '/signup', interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite('spotify.com/' + user['proxy']['country'].lower() + '/signup')
     pyautogui.typewrite(['enter'])
     wait()
 
     # Attempt to maximize window
-    print(">> Maximizing window")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-maximize.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait()        
+    #print(">> Maximizing window")
+    #ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-maximize.PNG", confidence=0.8)
+    #pyautogui.moveTo(ffx, ffy, duration=2)
+    #pyautogui.click()
+    #wait()        
 
     # Fill email
     print(">> Filling email entry")
@@ -367,7 +305,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(user['email'], interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(user['email'], interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Fill email confirmation
@@ -376,7 +314,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(user['email'], interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(user['email'], interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Navigate down
@@ -388,7 +326,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(user['pass'], interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(user['pass'], interval=round(rf(0.15, 0.4), 2))
 
     # Fill username
     print(">> Filling username entry")
@@ -396,7 +334,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(user['user'], interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(user['user'], interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Navigate down
@@ -421,7 +359,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(str(user['dob']['day']), interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(str(user['dob']['day']), interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Fill year
@@ -430,7 +368,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(str(user['dob']['year']), interval=round(rf(0.25, 0.6), 2))
+    pyautogui.typewrite(str(user['dob']['year']), interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Navigate down
@@ -451,10 +389,16 @@ def main():
 
     # Click registration data
     print(">> Filling registration data")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-marketing_info.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy, duration=2)
-    pyautogui.click()
-    wait()
+    try:
+        ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-marketing_info.PNG", confidence=0.8)
+        pyautogui.moveTo(ffx, ffy, duration=2)
+        pyautogui.click()
+        wait()
+    except:
+        ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-eea.PNG", confidence=0.8)
+        pyautogui.moveTo(ffx, ffy, duration=2)
+        pyautogui.click()
+        wait()    
 
     # Navigate down
     scroll()
@@ -472,8 +416,6 @@ def main():
     pyautogui.click()
     wait(30)
 
-    clearProxy()
-
     # Return firefox to windowed view
     ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-windowed.PNG", confidence=0.8)
     pyautogui.moveTo(ffx, ffy, duration=1)
@@ -486,28 +428,35 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
 
+    vpn_disconnect()
+
     print(">> Registering Mailsac email")
     emailInit(user['email'])
 
     print(user)
 
 if __name__ == "__main__":
+    print(">>\n>> PLEASE ENSURE THE FOLLOWING SETTINGS ARE ADJUSTED:")
+    print(">>\t'about:config' ==> 'general.useragent.override' is initialized")
+    print(">>\t'about:config' ==> 'geo.provider.ms-windows-location' ==> 'false'")
+    print(">>\t'about:config' ==> 'geo.enabled' ==> 'false'")
+    os.system("pause")
+    
     start = time.time()
-    print(">> Starting script, Session #" + str(start))
-    logfile = "logs/session" + str(start) + ".txt"
-    sys.stdout = open(logfile, 'w')
+    #print(">> Starting script, Session #" + str(start))
+    #logfile = "logs/session" + str(start) + ".txt"
+    #sys.stdout = open(logfile, 'w')
 
     try:
-        ffx, ffy = pyautogui.locateCenterOnScreen("img/python-minimize.PNG", confidence=0.8)
-        pyautogui.moveTo(ffx, ffy)
-        pyautogui.click()
+        #ffx, ffy = pyautogui.locateCenterOnScreen("img/python-minimize.PNG", confidence=0.8)
+        #pyautogui.moveTo(ffx, ffy)
+        #pyautogui.click()
         main()
     except TypeError as E:
         print(">> ERROR: Unable to find element on screen")
         print(E)
         print("UPTIME: %s" % (time.time() - start))
         os.system("pause") 
-    except Exception as E:
-        print(E)
-        print("UPTIME: %s" % (time.time() - start))
-        os.system("pause")   
+
+    print("UPTIME: %s" % (time.time() - start))
+    os.system("pause")   
