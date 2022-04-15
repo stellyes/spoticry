@@ -222,14 +222,13 @@ def getUser():
         "email": email,
         "user": username,
         "pass": password,
-        "dob": {
-            "day": birthday.day,
-            "month": birthday.month,
-            "year": birthday.year
-        },
+        "dob-day": birthday.day,
+        "dob-month": birthday.month,
+        "dob-year": birthday.year,
         "gender": gender,
         "useragent": useragent,
-        "location": vpn,
+        "country": vpn['country'],
+        "coordinates": vpn['coordinates'],
         "status": 0
     }    
 

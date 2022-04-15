@@ -26,4 +26,4 @@ def lambda_handler(event, context):
         Item = user
     )
 
-    return 0
+    return response
