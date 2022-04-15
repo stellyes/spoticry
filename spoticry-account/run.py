@@ -2,9 +2,14 @@ import os
 import time
 import json
 import string
-import platform
 import requests
 import pyautogui
+
+from pyautogui import FailSafeException
+
+from nordvpn_connect import initialize_vpn
+from nordvpn_connect import rotate_VPN as connect
+from nordvpn_connect import close_vpn_connection as disconnect
 
 from time import sleep
 from random import choice as rc
@@ -26,9 +31,23 @@ class dob:
 
 def wait(interval=0):
     if interval == 0:
-        sleep(ri(2, 6))
+        sleep(ri(5, 12))
     else:
         sleep(interval)
+
+def country_convert(string):
+    '''
+    Returns corresponding index value from CODE and VPN lists
+    '''        
+    if string in CODE:
+        index = CODE.index(string)
+        return VPN[index]
+    elif string in VPN:
+        index = VPN.index(string)
+        return CODE[index]
+    else:
+        print("Unable to determine index location for country " + string)    
+
 
 def scroll(interval=-100):
     if interval != -100:
@@ -48,6 +67,29 @@ def exists(window):
         return True
     except:
         return False    
+
+
+def doublecheck(path):
+    '''
+    The application safe 'locate' function
+    '''
+
+    i = 1
+    confidence_meter=0.8
+    print("\n\t\t\tSearching for '" + path + "'\n")
+
+    while confidence_meter > 0.35:
+        try:
+            ffx, ffy = pyautogui.locateCenterOnScreen(path, confidence=confidence_meter)
+            wait(1)
+            print("\t\t==> Attempt " + str(i) + " successful!")
+            return ffx, ffy 
+        except TypeError as E:
+            print("\t\t==> Attempt " + str(i) + " unsuccessful...\tConfidence: %.2f" % confidence_meter)
+            i += 1
+            confidence_meter -= 0.05
+
+    return 0, 0        
 
 
 def emailInit(email):
@@ -89,17 +131,9 @@ def vpn_connect(country):
     '''
     Connects to server with corresponding country location
     '''
-    command = "nordvpn -c -g '" + country
-    os.system(command)
-    wait(15)
-
-def vpn_disconnect():
-    '''
-    Disconnects from NordVPN server
-    '''
-    command = "nordvpn -d"
-    os.system(command)
-    wait(15)
+    settings = initialize_vpn(country)
+    connect(settings)
+    return settings
 
 def generate_username():
     '''
@@ -107,7 +141,7 @@ def generate_username():
     '''
 
     markers = [0, 0, 0, 0]          # Markers used to prevent duplicate entries
-    op0 = ri(0, 99)         # appended numbers to username
+    op0 = ri(0, 99)                 # appended numbers to username
     op1 = ''                        # first name options
     op2 = ''                        # last name options
     op3 = ''                        # random word from words list
@@ -154,7 +188,10 @@ def get_location():
     file = rc(os.listdir(root))                   
     country = root + file
     coordinates = select_entry(country)
-    parsed_country = VPN[CODE.index[file[:-4]]]
+
+    cc = file[:-4]
+    i = CODE.index(cc)
+    parsed_country = VPN[i]
 
     return { "country": parsed_country, "coordinates": coordinates }    
 
@@ -196,7 +233,6 @@ def getUser():
         "status": 0
     }    
 
-    print(user)
     return user
 
 def changeLocation(coordinates):
@@ -207,7 +243,7 @@ def changeLocation(coordinates):
     wait(1)
 
     print(">>\tClearing risk barrier")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-caution-config.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-caution-config.PNG")
     pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
     wait(1)
@@ -217,7 +253,7 @@ def changeLocation(coordinates):
     wait(1)
 
     print(">>\tEditing...")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-edit-wifi-geo-config.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-edit-wifi-geo-config.PNG")
     pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
     wait(1)
@@ -230,30 +266,20 @@ def changeLocation(coordinates):
     wait(1)
 
     print(">>\tSaving geo provider settings")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-location-settings-url-bar.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-change-location-searchbar.png")
     pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
+    pyautogui.press('backspace', presses=24)
     wait(1)
 
 def changeUserAgent(useragent):
     print(">> Changing user agent")
-    print(">>\tNavigating to settings")
-    pyautogui.typewrite("about:config")
-    pyautogui.typewrite(['enter'])
-    wait()
-
-    print(">>\tClearing risk barrier")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-caution-config.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy)
-    pyautogui.click()
-    wait(1)
-
     print(">>\tLocating user agent definition")
     pyautogui.typewrite("general.useragent.override")
     wait(1)
 
     print(">>\tEditing...")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-edit-wifi-geo-config.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-edit-wifi-geo-config.PNG")
     pyautogui.moveTo(ffx, ffy)
     pyautogui.click()
     wait(1)
@@ -264,9 +290,8 @@ def changeUserAgent(useragent):
     wait(1)
 
     print(">>\tSaving user agent settings")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-useragent-settings-url-bar.PNG", confidence=0.8)
-    pyautogui.moveTo(ffx, ffy)
-    pyautogui.click()
+    pyautogui.hotkey('ctrl', 'k')
+    pyautogui.press('backspace', presses=5)     # Presses quantifier unnecessary, just cautionary measures
     wait(1)
 
 def main():
@@ -276,32 +301,49 @@ def main():
 
     # Locate and open Firefox
     print(">> Locating Firefox logo")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefoxHomeScreen.png", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefoxHomeScreen.png")
     pyautogui.moveTo(ffx, ffy, duration=1)
     pyautogui.doubleClick()
     wait()
 
     # Hide browser/device from websites
-    vpn_connect(user['proxy']['country'])
-    changeLocation(user['proxy']['coordinates'])
+    print(">>\n>>\t\t CONNECTING TO VPN\n>>")
+    vpn = vpn_connect(user['location']['country'])
+    changeLocation(user['location']['coordinates'])
     changeUserAgent(user['useragent'])
 
     # Go to Spotify signup page
     print(">> Opening sign-up url")
-    pyautogui.typewrite('spotify.com/' + user['proxy']['country'].lower() + '/signup')
+    country = country_convert(user['location']['country'])
+    pyautogui.typewrite('spotify.com/' + country.lower() + '/signup')
     pyautogui.typewrite(['enter'])
     wait()
 
+    print(">> Clearing cookies/privacy window")
+    try:
+        ffx, ffy = doublecheck("img/spotify-accept-cookies.png")
+        pyautogui.moveTo(ffx, ffy, duration=2)
+        pyautogui.click()
+        wait()
+    except:
+        try:
+            ffx, ffy = doublecheck("img/spotify-privacy-accept.png")
+            pyautogui.moveTo(ffx, ffy, duration=2)
+            pyautogui.click()
+            wait()
+        except:
+            print(">> Unable to clear cookies/privacy warning")    
+
     # Attempt to maximize window
     #print(">> Maximizing window")
-    #ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-maximize.PNG", confidence=0.8)
+    #ffx, ffy = doublecheck("img/firefox-maximize.PNG", )
     #pyautogui.moveTo(ffx, ffy, duration=2)
     #pyautogui.click()
     #wait()        
 
     # Fill email
     print(">> Filling email entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-email_entry.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-email_entry.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -310,7 +352,7 @@ def main():
 
     # Fill email confirmation
     print(">> Filling email confirmation entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-email_confirm.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-email_confirm.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -322,7 +364,7 @@ def main():
 
     # Fill password
     print(">> Filling password entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-password_entry.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-password_entry.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -330,7 +372,7 @@ def main():
 
     # Fill username
     print(">> Filling username entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-username_entry.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-username_entry.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -342,20 +384,20 @@ def main():
 
     # Fill month
     print(">> Filling month entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-month_dropdown.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-month_dropdown.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
 
     mo_dir = "img/months/" + str(user['dob']['month']) + ".PNG"
-    ffx, ffy = pyautogui.locateCenterOnScreen(mo_dir, confidence=0.8)
+    ffx, ffy = doublecheck(mo_dir, )
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
     wait()
 
     # Fill day
     print(">> Filling day entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-birthday_day_entry.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-birthday_day_entry.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -364,7 +406,7 @@ def main():
 
     # Fill year
     print(">> Filling year entry")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-birthday_year_entry.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-birthday_year_entry.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
@@ -382,7 +424,7 @@ def main():
     else:
         gendir = "img/spotify_com-gender_entry-female.PNG"     
 
-    ffx, ffy = pyautogui.locateCenterOnScreen(gendir, confidence=0.8)
+    ffx, ffy = doublecheck(gendir, )
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
     wait()
@@ -390,12 +432,12 @@ def main():
     # Click registration data
     print(">> Filling registration data")
     try:
-        ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-marketing_info.PNG", confidence=0.8)
+        ffx, ffy = doublecheck("img/spotify_com-marketing_info.PNG")
         pyautogui.moveTo(ffx, ffy, duration=2)
         pyautogui.click()
         wait()
     except:
-        ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-eea.PNG", confidence=0.8)
+        ffx, ffy = doublecheck("img/spotify_com-eea.PNG", )
         pyautogui.moveTo(ffx, ffy, duration=2)
         pyautogui.click()
         wait()    
@@ -405,58 +447,70 @@ def main():
 
     # Click captcha
     print(">> Filling captcha")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-captcha_box.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-captcha_box.PNG")
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
     wait()
 
     print(">> Signing up")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/spotify_com-sign_up_button.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/spotify_com-sign_up_button.PNG")
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(30)
 
     # Return firefox to windowed view
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-windowed.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-windowed.PNG")
     pyautogui.moveTo(ffx, ffy, duration=1)
     pyautogui.click()
     wait()
 
     # Close window
     print(">> Closing Firefox")
-    ffx, ffy = pyautogui.locateCenterOnScreen("img/firefox-close.PNG", confidence=0.8)
+    ffx, ffy = doublecheck("img/firefox-close.PNG")
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
 
-    vpn_disconnect()
+    disconnect(vpn)
 
     print(">> Registering Mailsac email")
     emailInit(user['email'])
 
     print(user)
 
-if __name__ == "__main__":
+def setup():
     print(">>\n>> PLEASE ENSURE THE FOLLOWING SETTINGS ARE ADJUSTED:")
     print(">>\t'about:config' ==> 'general.useragent.override' is initialized")
     print(">>\t'about:config' ==> 'geo.provider.ms-windows-location' ==> 'false'")
     print(">>\t'about:config' ==> 'geo.enabled' ==> 'false'")
     os.system("pause")
-    
-    start = time.time()
+
     #print(">> Starting script, Session #" + str(start))
     #logfile = "logs/session" + str(start) + ".txt"
     #sys.stdout = open(logfile, 'w')
 
     try:
-        #ffx, ffy = pyautogui.locateCenterOnScreen("img/python-minimize.PNG", confidence=0.8)
-        #pyautogui.moveTo(ffx, ffy)
-        #pyautogui.click()
-        main()
+        ffx, ffy = doublecheck("img/python-minimize.PNG")
+        pyautogui.moveTo(ffx, ffy)
+        pyautogui.click()
+        main()   
     except TypeError as E:
         print(">> ERROR: Unable to find element on screen")
         print(E)
-        print("UPTIME: %s" % (time.time() - start))
-        os.system("pause") 
 
-    print("UPTIME: %s" % (time.time() - start))
+if __name__ == "__main__":
+    
+    # Element blocker
+    # https://addons.mozilla.org/en-US/firefox/addon/element-blocker/
+
+    flag = 1
+    start = time.time()
+
+    if flag == 0:
+        setup()
+    else:
+        try:
+            main()
+        except FailSafeException:
+            print(">>\n>> Failsafe triggered. Exiting...\n>>")
+    print(">> UPTIME: %s" % (time.time() - start))
     os.system("pause")   
