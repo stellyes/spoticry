@@ -307,13 +307,13 @@ def main():
 
     # Hide browser/device from websites
     print(">>\n>>\t\t CONNECTING TO VPN\n>>")
-    vpn = vpn_connect(user['location']['country'])
-    changeLocation(user['location']['coordinates'])
+    vpn = vpn_connect(user['country'])
+    changeLocation(user['coordinates'])
     changeUserAgent(user['useragent'])
 
     # Go to Spotify signup page
     print(">> Opening sign-up url")
-    country = country_convert(user['location']['country'])
+    country = country_convert(user['country'])
     pyautogui.typewrite('spotify.com/' + country.lower() + '/signup')
     pyautogui.typewrite(['enter'])
     wait()
