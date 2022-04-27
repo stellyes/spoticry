@@ -31,7 +31,7 @@ class dob:
 
 def wait(interval=0):
     if interval == 0:
-        sleep(ri(5, 12))
+        sleep(ri(8, 15))
     else:
         sleep(interval)
 
@@ -241,11 +241,11 @@ def changeLocation(coordinates):
     pyautogui.typewrite(['enter'])
     wait(1)
 
-    print(">>\tClearing risk barrier")
-    ffx, ffy = doublecheck("img/firefox-caution-config.PNG")
-    pyautogui.moveTo(ffx, ffy)
-    pyautogui.click()
-    wait(1)
+    #print(">>\tClearing risk barrier")
+    #ffx, ffy = doublecheck("img/firefox-caution-config.PNG")
+    #pyautogui.moveTo(ffx, ffy)
+    #pyautogui.click()
+    #wait(1)
 
     print(">>\tLocating provider")
     pyautogui.typewrite("geo.provider.network.url")
@@ -293,6 +293,35 @@ def changeUserAgent(useragent):
     pyautogui.press('backspace', presses=5)     # Presses quantifier unnecessary, just cautionary measures
     wait(1)
 
+def clearPrivacyCheck():
+    '''
+    Legacy Function:
+    Clears privacy barriers
+    '''    
+
+    print(">> Clearing cookies/privacy window")
+    try:
+        ffx, ffy = doublecheck("img/spotify-accept-cookies.png")
+        pyautogui.moveTo(ffx, ffy, duration=2)
+        pyautogui.click()
+        wait()
+    except:
+        try:
+            ffx, ffy = doublecheck("img/spotify-privacy-accept.png")
+            pyautogui.moveTo(ffx, ffy, duration=2)
+            pyautogui.click()
+            wait()
+        except:
+            print(">> Unable to clear cookies/privacy warning")
+
+def maximize():
+    # Attempt to maximize window
+    print(">> Maximizing window")
+    ffx, ffy = doublecheck("img/firefox-maximize.PNG", )
+    pyautogui.moveTo(ffx, ffy, duration=2)
+    pyautogui.click()
+    wait()               
+
 def main():
 
     print(">> Generating user data")
@@ -317,28 +346,6 @@ def main():
     pyautogui.typewrite('spotify.com/' + country.lower() + '/signup')
     pyautogui.typewrite(['enter'])
     wait()
-
-    print(">> Clearing cookies/privacy window")
-    try:
-        ffx, ffy = doublecheck("img/spotify-accept-cookies.png")
-        pyautogui.moveTo(ffx, ffy, duration=2)
-        pyautogui.click()
-        wait()
-    except:
-        try:
-            ffx, ffy = doublecheck("img/spotify-privacy-accept.png")
-            pyautogui.moveTo(ffx, ffy, duration=2)
-            pyautogui.click()
-            wait()
-        except:
-            print(">> Unable to clear cookies/privacy warning")    
-
-    # Attempt to maximize window
-    #print(">> Maximizing window")
-    #ffx, ffy = doublecheck("img/firefox-maximize.PNG", )
-    #pyautogui.moveTo(ffx, ffy, duration=2)
-    #pyautogui.click()
-    #wait()        
 
     # Fill email
     print(">> Filling email entry")
@@ -388,7 +395,7 @@ def main():
     pyautogui.click()
     wait(1)
 
-    mo_dir = "img/months/" + str(user['dob']['month']) + ".PNG"
+    mo_dir = "img/months/" + str(user['dob-month']) + ".PNG"
     ffx, ffy = doublecheck(mo_dir, )
     pyautogui.moveTo(ffx, ffy, duration=2)
     pyautogui.click()
@@ -400,7 +407,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(str(user['dob']['day']), interval=round(rf(0.15, 0.4), 2))
+    pyautogui.typewrite(str(user['dob-day']), interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Fill year
@@ -409,7 +416,7 @@ def main():
     pyautogui.moveTo(ffx, ffy, duration=3)
     pyautogui.click()
     wait(1)
-    pyautogui.typewrite(str(user['dob']['year']), interval=round(rf(0.15, 0.4), 2))
+    pyautogui.typewrite(str(user['dob-year']), interval=round(rf(0.15, 0.4), 2))
     wait()
 
     # Navigate down
@@ -478,6 +485,8 @@ def main():
 
 def setup():
     print(">>\n>> PLEASE ENSURE THE FOLLOWING SETTINGS ARE ADJUSTED:")
+    print(">>\tEnsure 'about:config' warning barrier is cleared")
+    print(">>\tEnsure NordVPN is open and disconnected")
     print(">>\t'about:config' ==> 'general.useragent.override' is initialized")
     print(">>\t'about:config' ==> 'geo.provider.ms-windows-location' ==> 'false'")
     print(">>\t'about:config' ==> 'geo.enabled' ==> 'false'")
