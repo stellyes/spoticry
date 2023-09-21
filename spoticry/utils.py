@@ -187,6 +187,7 @@ def fetch_image(amount):
     Generates requested amount of images
     '''
 
+    # Deprecated
     APIKEY = '075fc857-3a70-4fd8-a129-ba1cf2e62335'
 
     with open("src/resources/txt/words.txt", "r") as words:
